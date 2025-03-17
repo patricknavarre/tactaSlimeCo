@@ -8,31 +8,24 @@ export default function Home() {
   const featuredProducts = [
     {
       id: 1,
-      name: 'Bubblegum Cloud Slime',
-      price: 14.99,
-      image: '/images/slime-bubblegum.jpg',
-      description: 'Fluffy cloud slime with a sweet bubblegum scent.'
-    },
-    {
-      id: 2,
       name: 'Butter Slime - Strawberry',
       price: 12.99,
       image: '/images/slime-butter.jpg',
       description: 'Smooth butter slime with a delicious strawberry scent.'
     },
     {
-      id: 3,
+      id: 2,
       name: 'Glitter Galaxy Slime',
       price: 15.99,
       image: '/images/slime-galaxy.jpg',
       description: 'Mesmerizing galaxy slime filled with holographic glitter.'
     },
     {
-      id: 4,
-      name: 'Crunchy Rainbow Slime',
-      price: 13.99,
-      image: '/images/slime-crunchy.jpg',
-      description: 'Satisfyingly crunchy slime with rainbow foam beads.'
+      id: 3,
+      name: 'Video Game Slime',
+      price: 14.99,
+      image: '/images/slime-video-game.jpg',
+      description: 'Colorful slime inspired by retro video games with a fun texture.'
     }
   ];
 
@@ -90,9 +83,14 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-8 text-center">
             Our Featured Slimes
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="card group">
+              <div key={product.id} className="card group relative">
+                <div className="absolute top-2 left-2 z-10">
+                  <span className="bg-tacta-peach text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
+                    Featured
+                  </span>
+                </div>
                 <div className="relative h-64 bg-tacta-cream">
                   {/* This would be an actual image in production */}
                   <div className="absolute inset-0 flex items-center justify-center">
