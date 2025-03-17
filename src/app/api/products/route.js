@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import clientPromise, { connectToDatabase } from '@/lib/mongodb';
 import { createProductDocument } from '@/models/schemas';
 
 // GET handler to fetch all products
 export async function GET() {
   try {
-    const client = await clientPromise;
-    const db = client.db("tactaSlime");
+    // Use the connectToDatabase function which handles potential issues
+    const { client, db } = await connectToDatabase();
+    
+    // Handle the case where db is null
+    if (!db) {
+      console.error("Database connection failed");
+      return NextResponse.json(
+        { success: false, message: "Failed to connect to database. Please check your MongoDB configuration." },
+        { status: 500 }
+      );
+    }
     
     // Get all products
     const products = await db.collection("products").find({}).toArray();
@@ -27,8 +36,17 @@ export async function GET() {
 // POST handler to add a new product
 export async function POST(request) {
   try {
-    const client = await clientPromise;
-    const db = client.db("tactaSlime");
+    // Use the connectToDatabase function which handles potential issues
+    const { client, db } = await connectToDatabase();
+    
+    // Handle the case where db is null
+    if (!db) {
+      console.error("Database connection failed");
+      return NextResponse.json(
+        { success: false, message: "Failed to connect to database. Please check your MongoDB configuration." },
+        { status: 500 }
+      );
+    }
     
     // Parse the JSON body from the request
     const productData = await request.json();

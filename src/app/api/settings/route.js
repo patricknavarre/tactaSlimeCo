@@ -1,12 +1,22 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import clientPromise, { connectToDatabase } from '@/lib/mongodb';
 import { settingsSchema, createDefaultSettings } from '@/models/schemas';
 
 // GET handler - Fetch settings
 export async function GET(request) {
   try {
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || 'tactaSlime');
+    // Use the connectToDatabase function which handles potential issues
+    const { client, db } = await connectToDatabase();
+    
+    // Handle the case where db is null
+    if (!db) {
+      console.error("Database connection failed");
+      return NextResponse.json(
+        { error: "Failed to connect to database. Please check your MongoDB configuration." },
+        { status: 500 }
+      );
+    }
+    
     const settings = await db.collection('settings').findOne({});
     
     // If no settings exist, create default settings
@@ -29,8 +39,18 @@ export async function GET(request) {
 // POST handler - Update settings
 export async function POST(request) {
   try {
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB || 'tactaSlime');
+    // Use the connectToDatabase function which handles potential issues
+    const { client, db } = await connectToDatabase();
+    
+    // Handle the case where db is null
+    if (!db) {
+      console.error("Database connection failed");
+      return NextResponse.json(
+        { error: "Failed to connect to database. Please check your MongoDB configuration." },
+        { status: 500 }
+      );
+    }
+    
     const data = await request.json();
     
     // Validate settings data

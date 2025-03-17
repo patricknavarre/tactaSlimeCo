@@ -1,62 +1,94 @@
 import { MongoClient } from 'mongodb';
 
-// Skip MongoDB connection during Next.js build process
+// Check for MongoDB URI - more detailed logging
 const MONGODB_URI = process.env.MONGODB_URI;
-const isConnectingToMongoDB = 
-  process.env.MONGODB_URI && 
-  !process.env.NEXT_PHASE;  // NEXT_PHASE is set during build
+console.log('MONGODB_URI exists:', !!MONGODB_URI, 
+            'URI starts with:', MONGODB_URI ? MONGODB_URI.substring(0, 10) + '...' : 'n/a');
+
+// Better build phase detection
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+console.log('Build phase detected:', isBuildPhase);
 
 let client;
 let clientPromise;
 
-// During build, return a placeholder Promise to avoid errors
-if (!isConnectingToMongoDB) {
-  console.log('Build mode detected, skipping MongoDB connection');
-  // Return a placeholder promise that will never resolve
+// Handle potential connection scenarios
+if (!MONGODB_URI) {
+  console.error('⚠️ MONGODB_URI is not defined in environment variables');
+  clientPromise = Promise.resolve(null);
+} else if (isBuildPhase) {
+  console.log('🔄 Build phase detected, providing mock MongoDB client');
   clientPromise = Promise.resolve(null);
 } else {
-  console.log('Attempting to connect to MongoDB...');
-  
-  const options = {
-    useUnifiedTopology: true,
-  };
-  
-  if (process.env.NODE_ENV === 'development') {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (!global._mongoClientPromise) {
+  try {
+    console.log('🔌 Attempting to connect to MongoDB...');
+    
+    const options = {
+      useUnifiedTopology: true,
+    };
+    
+    if (process.env.NODE_ENV === 'development') {
+      // In development mode, use a global variable
+      if (!global._mongoClientPromise) {
+        client = new MongoClient(MONGODB_URI, options);
+        global._mongoClientPromise = client.connect()
+          .then(client => {
+            console.log('✅ Successfully connected to MongoDB in development mode');
+            return client;
+          })
+          .catch(err => {
+            console.error('❌ Failed to connect to MongoDB:', err);
+            return null;
+          });
+      }
+      clientPromise = global._mongoClientPromise;
+    } else {
+      // In production mode
       client = new MongoClient(MONGODB_URI, options);
-      global._mongoClientPromise = client.connect()
+      clientPromise = client.connect()
+        .then(client => {
+          console.log('✅ Successfully connected to MongoDB in production mode');
+          return client;
+        })
         .catch(err => {
-          console.error('Failed to connect to MongoDB:', err);
-          throw err;
+          console.error('❌ Failed to connect to MongoDB:', err);
+          return null;
         });
     }
-    clientPromise = global._mongoClientPromise;
-  } else {
-    // In production mode, it's best to not use a global variable.
-    client = new MongoClient(MONGODB_URI, options);
-    clientPromise = client.connect()
-      .catch(err => {
-        console.error('Failed to connect to MongoDB:', err);
-        throw err;
-      });
+  } catch (err) {
+    console.error('❌ Error setting up MongoDB connection:', err);
+    clientPromise = Promise.resolve(null);
   }
 }
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
+// Export the clientPromise
 export default clientPromise;
 
-// Add the connectToDatabase function for the API routes
+// Helper function to connect to the database
 export async function connectToDatabase() {
-  // Skip during build time
-  if (!isConnectingToMongoDB) {
-    console.log('Build phase detected, skipping database connection');
-    return { client: null, db: null };
+  try {
+    if (isBuildPhase) {
+      console.log('🔄 Build phase, skipping database connection');
+      return { client: null, db: null };
+    }
+    
+    if (!MONGODB_URI) {
+      console.error('⚠️ Cannot connect to database: MONGODB_URI is not defined');
+      return { client: null, db: null };
+    }
+    
+    const client = await clientPromise;
+    
+    if (!client) {
+      console.error('⚠️ Failed to get MongoDB client');
+      return { client: null, db: null };
+    }
+    
+    const db = client.db(process.env.MONGODB_DB || 'tactaSlime');
+    console.log('✅ Successfully connected to database:', process.env.MONGODB_DB || 'tactaSlime');
+    return { client, db };
+  } catch (error) {
+    console.error('❌ Error in connectToDatabase:', error);
+    return { client: null, db: null, error };
   }
-  
-  const client = await clientPromise;
-  const db = client?.db(process.env.MONGODB_DB || 'tactaSlime');
-  return { client, db };
 } 
