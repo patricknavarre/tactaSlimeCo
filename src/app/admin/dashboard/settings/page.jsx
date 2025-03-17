@@ -6,27 +6,51 @@ import Image from 'next/image';
 
 // Simple Settings Page Component
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('theme');
   const [saveStatus, setSaveStatus] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Settings state
-  const [settings, setSettings] = useState(null);
+  // Theme settings state 
+  const [themeSettings, setThemeSettings] = useState({
+    primaryColor: '#ff407d',
+    secondaryColor: '#6c48c9',
+    type: 'theme'
+  });
+
+  // General store settings (for future use)
+  const [storeSettings, setStoreSettings] = useState({
+    storeName: 'Tacta Slime',
+    storeEmail: 'info@tactaslime.com',
+    storePhone: '',
+    storeAddress: '',
+    type: 'store'
+  });
   
   // Fetch settings when component mounts
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setIsLoading(true);
+        console.log('Fetching settings...');
         const response = await fetch('/api/settings');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch settings');
+          throw new Error(`Failed to fetch settings: ${response.status}`);
         }
         
         const data = await response.json();
-        setSettings(data);
+        console.log('Settings fetched:', data);
+        
+        // Handle the theme settings
+        if (data && data.type === 'theme') {
+          setThemeSettings({
+            primaryColor: data.primaryColor || '#ff407d',
+            secondaryColor: data.secondaryColor || '#6c48c9',
+            type: 'theme'
+          });
+        }
+        
         setError(null);
       } catch (err) {
         console.error('Error fetching settings:', err);
@@ -39,67 +63,19 @@ export default function SettingsPage() {
     fetchSettings();
   }, []);
   
-  // Handle input changes
-  const handleGeneralChange = (field, value) => {
-    setSettings(prev => ({
+  // Handle theme color changes
+  const handleThemeChange = (field, value) => {
+    setThemeSettings(prev => ({
       ...prev,
-      storeInfo: {
-        ...prev.storeInfo,
-        [field]: value
-      }
+      [field]: value
     }));
   };
   
-  const handleConfigChange = (field, value) => {
-    setSettings(prev => ({
+  // Handle store settings changes
+  const handleStoreChange = (field, value) => {
+    setStoreSettings(prev => ({
       ...prev,
-      generalSettings: {
-        ...prev.generalSettings,
-        [field]: value
-      }
-    }));
-  };
-  
-  const handlePaymentChange = (index, enabled) => {
-    setSettings(prev => {
-      const updatedPayments = [...prev.paymentMethods];
-      updatedPayments[index] = {
-        ...updatedPayments[index],
-        enabled
-      };
-      
-      return {
-        ...prev,
-        paymentMethods: updatedPayments
-      };
-    });
-  };
-  
-  const handleShippingChange = (index, field, value) => {
-    setSettings(prev => {
-      const updatedShipping = [...prev.shippingOptions];
-      updatedShipping[index] = {
-        ...updatedShipping[index],
-        [field]: value
-      };
-      
-      return {
-        ...prev,
-        shippingOptions: updatedShipping
-      };
-    });
-  };
-  
-  const handleNotificationChange = (type, field, value) => {
-    setSettings(prev => ({
-      ...prev,
-      notificationSettings: {
-        ...prev.notificationSettings,
-        [type]: {
-          ...prev.notificationSettings[type],
-          [field]: value
-        }
-      }
+      [field]: value
     }));
   };
   
@@ -107,6 +83,9 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       setSaveStatus('saving');
+      console.log('Saving settings:', themeSettings);
+      
+      const settings = activeTab === 'theme' ? themeSettings : storeSettings;
       
       const response = await fetch('/api/settings', {
         method: 'POST',
@@ -117,8 +96,12 @@ export default function SettingsPage() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to save settings');
+        const errorData = await response.json();
+        throw new Error(`Failed to save settings: ${errorData.error || response.status}`);
       }
+      
+      const result = await response.json();
+      console.log('Settings saved:', result);
       
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(''), 3000);
@@ -134,7 +117,7 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tacta-pink mx-auto"></div>
           <p className="mt-4 text-gray-700">Loading settings...</p>
         </div>
       </div>
@@ -155,26 +138,9 @@ export default function SettingsPage() {
           <p className="text-gray-600 text-center mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+            className="w-full bg-tacta-pink text-white py-2 px-4 rounded-md hover:bg-tacta-pink-dark"
           >
             Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
-  // No settings found
-  if (!settings) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-700">No settings found. Please try again.</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-          >
-            Reload
           </button>
         </div>
       </div>
@@ -188,23 +154,24 @@ export default function SettingsPage() {
         <div className="mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/admin/dashboard" className="flex items-center">
-              <Image 
-                src="/images/TactaLogo_image002.png"
-                alt="Tacta Slime Logo"
-                width={40}
-                height={40}
-                className="h-10 w-auto mr-2"
-              />
+              <div className="relative h-10 w-20 mr-2">
+                <Image 
+                  src="/images/TactaLogo_image002.png"
+                  alt="Tacta Slime Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <span className="text-lg font-semibold">Admin Dashboard</span>
             </Link>
           </div>
           <div className="flex items-center">
-            <Link href="/" className="text-sm text-blue-600 hover:text-blue-800 mr-4">
+            <Link href="/" className="text-sm text-tacta-pink hover:text-tacta-pink-dark mr-4">
               View Site
             </Link>
-            <button className="text-sm text-red-600 hover:text-red-800">
+            <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-800">
               Logout
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -218,52 +185,22 @@ export default function SettingsPage() {
             <ul className="space-y-1">
               <li>
                 <button
-                  onClick={() => setActiveTab('general')}
+                  onClick={() => setActiveTab('theme')}
                   className={`w-full text-left px-3 py-2 rounded-md ${
-                    activeTab === 'general' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                    activeTab === 'theme' ? 'bg-tacta-pink-light text-tacta-pink' : 'hover:bg-gray-100'
                   }`}
                 >
-                  General
+                  Theme Settings
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => setActiveTab('payments')}
+                  onClick={() => setActiveTab('store')}
                   className={`w-full text-left px-3 py-2 rounded-md ${
-                    activeTab === 'payments' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                    activeTab === 'store' ? 'bg-tacta-pink-light text-tacta-pink' : 'hover:bg-gray-100'
                   }`}
                 >
-                  Payments
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setActiveTab('shipping')}
-                  className={`w-full text-left px-3 py-2 rounded-md ${
-                    activeTab === 'shipping' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  Shipping
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setActiveTab('notifications')}
-                  className={`w-full text-left px-3 py-2 rounded-md ${
-                    activeTab === 'notifications' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  Notifications
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setActiveTab('users')}
-                  className={`w-full text-left px-3 py-2 rounded-md ${
-                    activeTab === 'users' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  Users
+                  Store Information
                 </button>
               </li>
             </ul>
@@ -272,292 +209,180 @@ export default function SettingsPage() {
 
         {/* Content Area */}
         <div className="flex-1 p-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h1 className="text-2xl font-bold mb-6">
-              {activeTab === 'general' && 'General Settings'}
-              {activeTab === 'payments' && 'Payment Settings'}
-              {activeTab === 'shipping' && 'Shipping Settings'}
-              {activeTab === 'notifications' && 'Notification Settings'}
-              {activeTab === 'users' && 'User Settings'}
-            </h1>
-            
-            {/* Tab Content */}
-            <div className="mt-4">
-              {activeTab === 'general' && (
-                <div className="space-y-4">
+          {/* Theme Settings */}
+          {activeTab === 'theme' && (
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Theme Settings</h1>
+              
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Primary Color */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Store Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Primary Color
+                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="color"
+                        value={themeSettings.primaryColor}
+                        onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                        className="h-10 w-10 rounded border border-gray-300 mr-2"
+                      />
+                      <input
+                        type="text"
+                        value={themeSettings.primaryColor}
+                        onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                        className="flex-1 p-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Used for buttons, links, and highlights
+                    </p>
+                  </div>
+                  
+                  {/* Secondary Color */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Secondary Color
+                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="color"
+                        value={themeSettings.secondaryColor}
+                        onChange={(e) => handleThemeChange('secondaryColor', e.target.value)}
+                        className="h-10 w-10 rounded border border-gray-300 mr-2"
+                      />
+                      <input
+                        type="text"
+                        value={themeSettings.secondaryColor}
+                        onChange={(e) => handleThemeChange('secondaryColor', e.target.value)}
+                        className="flex-1 p-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Used for accents and secondary elements
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-8">
+                  <h3 className="text-lg font-medium mb-4">Preview</h3>
+                  <div className="bg-gray-100 p-4 rounded-md">
+                    <div className="flex space-x-4 mb-4">
+                      <button 
+                        className="px-4 py-2 rounded-md text-white" 
+                        style={{ backgroundColor: themeSettings.primaryColor }}
+                      >
+                        Primary Button
+                      </button>
+                      <button 
+                        className="px-4 py-2 rounded-md text-white" 
+                        style={{ backgroundColor: themeSettings.secondaryColor }}
+                      >
+                        Secondary Button
+                      </button>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <h4 
+                        className="text-lg font-medium mb-2" 
+                        style={{ color: themeSettings.primaryColor }}
+                      >
+                        Sample Heading
+                      </h4>
+                      <p className="text-gray-800">
+                        Regular text with <a href="#" style={{ color: themeSettings.primaryColor }}>primary links</a> and 
+                        <a href="#" style={{ color: themeSettings.secondaryColor }}> secondary links</a>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Store Settings (future implementation) */}
+          {activeTab === 'store' && (
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Store Information</h1>
+              
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Store Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Store Name
+                    </label>
                     <input
                       type="text"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.storeInfo.name}
-                      onChange={(e) => handleGeneralChange('name', e.target.value)}
+                      value={storeSettings.storeName}
+                      onChange={(e) => handleStoreChange('storeName', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
                     />
                   </div>
+                  
+                  {/* Store Email */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Store Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Email
+                    </label>
                     <input
                       type="email"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.storeInfo.email}
-                      onChange={(e) => handleGeneralChange('email', e.target.value)}
+                      value={storeSettings.storeEmail}
+                      onChange={(e) => handleStoreChange('storeEmail', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
                     />
                   </div>
+                  
+                  {/* Store Phone */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Phone
+                    </label>
                     <input
                       type="tel"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.storeInfo.phone}
-                      onChange={(e) => handleGeneralChange('phone', e.target.value)}
-                      placeholder="(123) 456-7890"
+                      value={storeSettings.storePhone}
+                      onChange={(e) => handleStoreChange('storePhone', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="(555) 123-4567"
                     />
                   </div>
+                  
+                  {/* Store Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Store Address</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Store Address
+                    </label>
                     <textarea
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.storeInfo.address}
-                      onChange={(e) => handleGeneralChange('address', e.target.value)}
+                      value={storeSettings.storeAddress}
+                      onChange={(e) => handleStoreChange('storeAddress', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
                       rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Currency</label>
-                    <select 
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.generalSettings.currency}
-                      onChange={(e) => handleConfigChange('currency', e.target.value)}
-                    >
-                      <option value="USD">USD ($)</option>
-                      <option value="EUR">EUR (€)</option>
-                      <option value="GBP">GBP (£)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Default Language</label>
-                    <select 
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.generalSettings.language}
-                      onChange={(e) => handleConfigChange('language', e.target.value)}
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Tax Rate (%)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="100"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={settings.generalSettings.taxRate || 0}
-                      onChange={(e) => handleConfigChange('taxRate', parseFloat(e.target.value))}
+                      placeholder="123 Slime Street, Tacta City, TS 12345"
                     />
                   </div>
                 </div>
-              )}
-
-              {activeTab === 'payments' && (
-                <div className="space-y-4">
-                  <p className="text-gray-700">Configure your payment methods and settings</p>
-                  {settings.paymentMethods.map((method, index) => (
-                    <div key={index} className="border rounded-md p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <input 
-                            type="checkbox" 
-                            id={`payment-${method.name}`} 
-                            className="h-4 w-4 text-blue-600" 
-                            checked={method.enabled}
-                            onChange={(e) => handlePaymentChange(index, e.target.checked)}
-                          />
-                          <label htmlFor={`payment-${method.name}`} className="ml-2 block text-sm font-medium text-gray-700">
-                            {method.name}
-                          </label>
-                        </div>
-                        <button className="text-sm text-blue-600">Configure</button>
-                      </div>
-                    </div>
-                  ))}
-                  <button className="text-sm text-blue-600">+ Add Payment Method</button>
-                </div>
-              )}
-
-              {activeTab === 'shipping' && (
-                <div className="space-y-4">
-                  <p className="text-gray-700">Configure your shipping options</p>
-                  {settings.shippingOptions.map((option, index) => (
-                    <div key={index} className="border rounded-md p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <input 
-                            type="checkbox" 
-                            id={`shipping-${index}`} 
-                            className="h-4 w-4 text-blue-600" 
-                            checked={option.enabled}
-                            onChange={(e) => handleShippingChange(index, 'enabled', e.target.checked)}
-                          />
-                          <label htmlFor={`shipping-${index}`} className="ml-2 block text-sm font-medium text-gray-700">
-                            {option.name}
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium">${option.price.toFixed(2)}</span>
-                          <button className="text-sm text-blue-600">Edit</button>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500">{option.description}</p>
-                    </div>
-                  ))}
-                  <button className="text-sm text-blue-600">+ Add Shipping Option</button>
-                </div>
-              )}
-
-              {activeTab === 'notifications' && (
-                <div className="space-y-4">
-                  <p className="text-gray-700">Configure your email notifications</p>
-                  <div className="border rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">New Order Notifications</label>
-                      <div className="relative inline-block w-10 align-middle select-none">
-                        <input 
-                          type="checkbox" 
-                          id="new-order" 
-                          className="sr-only" 
-                          checked={settings.notificationSettings.newOrder.enabled}
-                          onChange={(e) => handleNotificationChange('newOrder', 'enabled', e.target.checked)}
-                        />
-                        <div className="block h-6 bg-gray-300 rounded-full w-10"></div>
-                        <div className={`dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition-transform ${
-                          settings.notificationSettings.newOrder.enabled ? 'transform translate-x-4' : ''
-                        }`}></div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">Receive email notifications when new orders are placed</p>
-                  </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">Low Stock Alerts</label>
-                      <div className="relative inline-block w-10 align-middle select-none">
-                        <input 
-                          type="checkbox" 
-                          id="low-stock" 
-                          className="sr-only" 
-                          checked={settings.notificationSettings.lowStock.enabled}
-                          onChange={(e) => handleNotificationChange('lowStock', 'enabled', e.target.checked)}
-                        />
-                        <div className="block h-6 bg-gray-300 rounded-full w-10"></div>
-                        <div className={`dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition-transform ${
-                          settings.notificationSettings.lowStock.enabled ? 'transform translate-x-4' : ''
-                        }`}></div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">Receive alerts when product stock is low</p>
-                    
-                    {settings.notificationSettings.lowStock.enabled && (
-                      <div className="mt-3">
-                        <label className="block text-xs font-medium text-gray-700">Threshold</label>
-                        <input
-                          type="number"
-                          min="1"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          value={settings.notificationSettings.lowStock.threshold}
-                          onChange={(e) => handleNotificationChange('lowStock', 'threshold', parseInt(e.target.value))}
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Alert when stock falls below this number</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">Customer Signup Notifications</label>
-                      <div className="relative inline-block w-10 align-middle select-none">
-                        <input 
-                          type="checkbox" 
-                          id="customer-signup" 
-                          className="sr-only" 
-                          checked={settings.notificationSettings.customerSignup.enabled}
-                          onChange={(e) => handleNotificationChange('customerSignup', 'enabled', e.target.checked)}
-                        />
-                        <div className="block h-6 bg-gray-300 rounded-full w-10"></div>
-                        <div className={`dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition-transform ${
-                          settings.notificationSettings.customerSignup.enabled ? 'transform translate-x-4' : ''
-                        }`}></div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">Receive email notifications when new customers sign up</p>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'users' && (
-                <div className="space-y-4">
-                  <p className="text-gray-700">Manage admin users</p>
-                  
-                  {settings.users.length > 0 ? (
-                    settings.users.map((user, index) => (
-                      <div key={index} className="border rounded-md p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="text-sm font-medium text-gray-700">{user.name}</h3>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                            <p className="text-xs text-gray-500">Role: {user.role}</p>
-                          </div>
-                          <button className="text-sm text-blue-600">Edit</button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="border rounded-md p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-700">Admin</h3>
-                          <p className="text-xs text-gray-500">admin@tactaslime.com</p>
-                        </div>
-                        <button className="text-sm text-blue-600">Edit</button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <button className="text-sm text-blue-600">+ Add User</button>
-                </div>
-              )}
+              </div>
             </div>
+          )}
 
-            {/* Save Button and Status */}
-            <div className="mt-6 flex justify-end">
-              {saveStatus === 'error' && (
-                <div className="mr-4 text-red-500 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  Failed to save settings
-                </div>
-              )}
-              
-              {saveStatus === 'saved' && (
-                <div className="mr-4 text-green-500 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Settings saved successfully
-                </div>
-              )}
-              
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                disabled={saveStatus === 'saving' || isLoading}
-              >
-                {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
+          {/* Save Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={saveStatus === 'saving'}
+              className={`px-4 py-2 rounded-md text-white ${
+                saveStatus === 'saving' ? 'bg-gray-400' : 
+                saveStatus === 'saved' ? 'bg-green-500' : 
+                saveStatus === 'error' ? 'bg-red-500' : 
+                'bg-tacta-pink hover:bg-tacta-pink-dark'
+              }`}
+            >
+              {saveStatus === 'saving' ? 'Saving...' : 
+               saveStatus === 'saved' ? 'Saved!' : 
+               saveStatus === 'error' ? 'Error!' : 
+               'Save Settings'}
+            </button>
           </div>
         </div>
       </div>
