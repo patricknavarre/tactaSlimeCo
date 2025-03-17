@@ -1,7 +1,8 @@
 import { MongoClient } from 'mongodb';
 
+// Check for MongoDB URI with better error message that doesn't mention .env.local specifically
 if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your MongoDB URI to .env.local');
+  throw new Error('MongoDB URI is not defined in environment variables');
 }
 
 const uri = process.env.MONGODB_URI;
@@ -9,9 +10,8 @@ const options = {
   useUnifiedTopology: true,
 };
 
-// Add debugging
-console.log('Attempting to connect to MongoDB with URI format:', 
-  uri.replace(/mongodb(\+srv)?:\/\/[^:]+:([^@]+)@/, 'mongodb$1://****:****@'));
+// Add debugging that's safer for logs
+console.log('Attempting to connect to MongoDB...');
 
 let client;
 let clientPromise;
