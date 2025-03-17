@@ -1,0 +1,220 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme CSS Variables */
+:root {
+  /* Default theme values that will be overridden by ThemeProvider */
+  --color-primary: #0f766e;
+  --color-secondary: #ec4899;
+  --color-accent: #8b5cf6;
+  --color-background: #f9fafb;
+  --color-text: #111827;
+  
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --heading-size: 1.875rem;
+  --body-size: 1rem;
+  
+  --container-width: 90%;
+  --border-radius: 0.5rem;
+  --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  --button-radius: 0.375rem;
+  
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --tacta-pink: #ff7bac;
+  --tacta-pink-light: #ffa5c8;
+  --tacta-pink-dark: #e75c9d;
+  --tacta-peach: #ffaa7b;
+  --tacta-peach-light: #ffc7a5;
+  --tacta-peach-dark: #ff9966;
+  --tacta-cream: #fff5e6;
+}
+
+/* Apply theme variables to elements */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+  
+  h1 { font-size: calc(var(--heading-size) * 1.2); }
+  h2 { font-size: var(--heading-size); }
+  h3 { font-size: calc(var(--heading-size) * 0.8); }
+  
+  .container {
+    width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@layer components {
+  /* Themed button variants */
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--button-radius);
+  }
+  
+  .btn-secondary {
+    background-color: var(--color-secondary);
+    color: white;
+    border-radius: var(--button-radius);
+  }
+  
+  .btn-accent {
+    background-color: var(--color-accent);
+    color: white;
+    border-radius: var(--button-radius);
+  }
+  
+  /* Themed card */
+  .themed-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tacta-pink;
+  }
+}
+
+/* Existing styles below */
+
+/* Cartoon-style buttons */
+.cartoon-btn {
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2), 0 2px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(0);
+  outline: 2px solid transparent;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.cartoon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.2), 0 3px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cartoon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2), 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary.cartoon-btn {
+  background-color: #ff7bac;
+  color: white;
+  border: 2px solid #e75c9d;
+}
+
+.btn-primary.cartoon-btn:hover {
+  background-color: #ffaa7b;
+  border-color: #ff9966;
+}
+
+.btn-secondary.cartoon-btn {
+  background-color: white;
+  color: #ff7bac;
+  border: 2px solid #ffa5c8;
+}
+
+.btn-secondary.cartoon-btn:hover {
+  background-color: #ffa5c8;
+  color: #e75c9d;
+}
+
+/* Cart animation */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+.bounce {
+  animation: bounce 1s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* Add to cart button with blob effect */
+.blob-btn {
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  background-color: #ff7bac;
+  border-radius: 0.5rem;
+  border: 2px solid #e75c9d;
+  transition: all 0.2s;
+  overflow: hidden;
+  z-index: 1;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.blob-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: #ffaa7b;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.blob-btn:hover::before {
+  width: 250%;
+  height: 300%;
+}
+
+.blob-btn:active {
+  transform: scale(0.95);
+} 

@@ -1,0 +1,47 @@
+{
+  "name": "tacta-slime",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:frontend": "next dev -p 5053",
+    "dev:backend": "next dev -p 5051",
+    "build": "next build",
+    "start": "next start",
+    "start:frontend": "next start -p 5050",
+    "start:backend": "next start -p 5051",
+    "lint": "next lint",
+    "sync-products": "node -r esm src/scripts/sync-products.js"
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "@shopify/hydrogen-react": "^2025.1.2",
+    "@shopify/shopify-api": "^11.10.0",
+    "@types/node": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "axios": "^1.8.3",
+    "bcryptjs": "^3.0.2",
+    "eslint": "*",
+    "eslint-config-next": "*",
+    "formidable": "^3.5.2",
+    "framer-motion": "^12.5.0",
+    "mongodb": "^6.14.2",
+    "mongoose": "^8.12.1",
+    "next": "*",
+    "next-auth": "^4.24.11",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.54.2",
+    "sharp": "^0.33.5",
+    "shopify-buy": "^3.0.0",
+    "typescript": "*",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "esm": "^3.2.25",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.1"
+  }
+}
