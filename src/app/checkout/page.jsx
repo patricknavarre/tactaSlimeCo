@@ -139,6 +139,65 @@ export default function CheckoutPage() {
       
       console.log('Customer confirmation email sent successfully:', customerResponse);
       
+      // Save order to database
+      try {
+        // Prepare order data for MongoDB
+        const orderData = {
+          customer: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone
+          },
+          items: cartItems.map(item => ({
+            productId: item.id || item._id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            total: item.price * item.quantity
+          })),
+          total: calculateTotal(),
+          subtotal: calculateTotal(),
+          tax: 0, // You can add tax calculation later
+          shipping: 0, // You can add shipping cost calculation later
+          status: 'Pending',
+          shippingAddress: {
+            line1: formData.address,
+            city: formData.city,
+            state: formData.state,
+            postalCode: formData.zipCode,
+            country: 'US'
+          },
+          paymentInfo: {
+            method: 'Venmo/Cash',
+            status: 'Pending'
+          },
+          notes: formData.notes || ''
+        };
+        
+        console.log('Saving order to database:', orderData);
+        
+        // Save to MongoDB via API
+        const saveResponse = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        });
+        
+        if (!saveResponse.ok) {
+          const errorData = await saveResponse.json();
+          console.error('Failed to save order to database:', errorData);
+          // Continue with checkout process even if saving to DB fails
+        } else {
+          const result = await saveResponse.json();
+          console.log('Order saved to database successfully:', result);
+        }
+      } catch (dbError) {
+        console.error('Error saving order to database:', dbError);
+        // Continue with checkout process even if saving to DB fails
+      }
+      
       // Show success modal
       setShowModal(true);
       
