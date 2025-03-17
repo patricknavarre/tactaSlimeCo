@@ -66,16 +66,6 @@ const Footer = () => {
                   FAQ
                 </Link>
               </li>
-              <li>
-                <Link href="/shipping" className="text-gray-700 hover:text-tacta-pink">
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-gray-700 hover:text-tacta-pink">
-                  Terms & Conditions
-                </Link>
-              </li>
             </ul>
           </div>
           
