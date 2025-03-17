@@ -60,10 +60,10 @@ export default function Home() {
                 Experience the joy of playing with premium handmade slime. Our slimes are made with high-quality ingredients for the most satisfying sensory experience.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/products" className="btn-primary">
+                <Link href="/products" className="btn-primary cartoon-btn">
                   Shop Now
                 </Link>
-                <Link href="/about" className="btn-secondary">
+                <Link href="/about" className="btn-secondary cartoon-btn">
                   Learn More
                 </Link>
               </div>
@@ -106,7 +106,7 @@ export default function Home() {
                   <p className="text-gray-600 mb-2 text-sm">{product.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-lg">${product.price.toFixed(2)}</span>
-                    <button className="btn-primary text-sm">
+                    <button className="btn-primary cartoon-btn text-sm">
                       Add to Cart
                     </button>
                   </div>
@@ -115,7 +115,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-12">
-            <Link href="/products" className="btn-secondary">
+            <Link href="/products" className="btn-secondary cartoon-btn">
               View All Products
             </Link>
           </div>
@@ -180,7 +180,7 @@ export default function Home() {
               className="input-field sm:flex-1 max-w-md"
               required
             />
-            <button type="submit" className="btn-primary whitespace-nowrap">
+            <button type="submit" className="btn-primary cartoon-btn whitespace-nowrap">
               Subscribe Now
             </button>
           </form>
