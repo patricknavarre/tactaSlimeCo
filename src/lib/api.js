@@ -92,13 +92,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:50
  */
 export async function fetchProducts() {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/products`);
+    console.log('Fetching products from:', `${API_BASE_URL}api/products`);
+    const response = await fetch(`${API_BASE_URL}api/products`);
     
     if (!response.ok) {
       throw new Error(`Error fetching products: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Products data received:', data);
     return data.products;
   } catch (error) {
     console.error('Failed to fetch products:', error);
@@ -111,13 +113,31 @@ export async function fetchProducts() {
  */
 export async function fetchProductById(id) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+    console.log(`Fetching product with ID: ${id} from: ${API_BASE_URL}api/products/${id}`);
+    
+    // Make sure we're using the correct URL format
+    const url = `${API_BASE_URL}api/products/${id}`;
+    console.log('Full request URL:', url);
+    
+    const response = await fetch(url);
+    
+    // Log response status
+    console.log(`Product fetch response status: ${response.status}`);
     
     if (!response.ok) {
-      throw new Error(`Error fetching product: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Error response body:', errorText);
+      throw new Error(`Error fetching product: ${response.status}. Details: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('Product data received:', data);
+    
+    if (!data.product) {
+      console.error('No product data in response:', data);
+      throw new Error('No product data returned from API');
+    }
+    
     return data.product;
   } catch (error) {
     console.error(`Failed to fetch product ${id}:`, error);

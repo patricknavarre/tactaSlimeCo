@@ -3,29 +3,49 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import ProductForm from '@/components/admin/ProductForm';
-import { fetchProductById, updateProduct } from '@/lib/api';
 
 export default function EditProductPage({ params }) {
-  // Get id from params (using useId when it becomes required in future Next.js versions)
+  // Get id from params
   const router = useRouter();
-  const id = params.id; // For future: const id = React.use(params).id;
+  const id = params.id;
   
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  console.log('Edit Product Page - Product ID:', id);
+
   // Fetch product data on component mount
   useEffect(() => {
     async function loadProduct() {
       setIsLoading(true);
       try {
-        const productData = await fetchProductById(id);
-        setProduct(productData);
+        console.log('Fetching product data for ID:', id);
+        
+        // Direct API call instead of using the utility function
+        const response = await fetch(`/api/products/${id}`);
+        console.log('API Response Status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`Failed to load product: API returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Product data received:', data);
+        
+        if (data.success && data.product) {
+          setProduct(data.product);
+        } else {
+          setError('Product data not found in API response');
+        }
       } catch (error) {
         console.error('Error loading product:', error);
-        setError('Failed to load product. Please try again.');
+        setError(`Failed to load product: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -68,8 +88,25 @@ export default function EditProductPage({ params }) {
       // Debug: Log data after processing
       console.log('Cleaned data to send:', productData);
       
-      // Submit to API
-      const result = await updateProduct(id, productData);
+      // Direct API call to update product
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      console.log('Update response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Update error response:', errorData);
+        throw new Error(`Failed to update product: Server returned ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('Update result:', result);
       
       if (result.success) {
         // Redirect to product list on success
@@ -108,6 +145,11 @@ export default function EditProductPage({ params }) {
           <p className="mt-2 text-gray-600">
             The product you're trying to edit doesn't exist or has been deleted.
           </p>
+          {error && (
+            <p className="mt-2 text-red-500 text-sm">
+              {error}
+            </p>
+          )}
           <div className="mt-4">
             <Link href="/admin/dashboard/products" className="btn-primary">
               Back to Products
@@ -125,21 +167,16 @@ export default function EditProductPage({ params }) {
         <div className="container-custom flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link href="/admin/dashboard" className="flex-shrink-0">
-              <svg 
-                className="w-36 h-12" 
-                viewBox="0 0 600 300" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Pink tacta logo - simplified for brevity */}
-                <g>
-                  <path d="M18.5,90.7c7.3,0,19.3,1.3,27.3,5.3c8,4,13.3,12,13.3,21.3c0,10-4.7,18-12.7,22c-8,4-17.3,5.3-24.7,5.3h-6.7v23.3h-14v-77.3H18.5z" fill="#FF1493"/>
-                  <path d="M126.2,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H126.2z" fill="#FF1493"/>
-                  <path d="M233.8,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H233.8z" fill="#FF1493"/>
-                  <path d="M341.5,90.7c7.3,0,19.3,1.3,27.3,5.3c8,4,13.3,12,13.3,21.3c0,10-4.7,18-12.7,22c-8,4-17.3,5.3-24.7,5.3h-6.7v23.3h-14v-77.3H341.5z" fill="#FF1493"/>
-                  <path d="M449.2,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H449.2z" fill="#FF1493"/>
-                </g>
-              </svg>
+              <div className="relative h-12 w-48">
+                <Image
+                  src="/images/TactaLogo_image002.png"
+                  alt="Tacta Slime Company Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                  quality={100}
+                />
+              </div>
             </Link>
             <span className="ml-4 text-xl font-semibold text-gray-900">Edit Product</span>
           </div>
