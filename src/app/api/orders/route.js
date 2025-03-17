@@ -42,19 +42,67 @@ export async function POST(request) {
     console.log("POST /api/orders - MongoDB connection established");
     const db = client.db("tactaSlime");
     
+    // Check if there's MongoDB validation on the collection
+    try {
+      const collInfo = await db.listCollections({ name: "orders" }).toArray();
+      if (collInfo.length > 0) {
+        console.log("POST /api/orders - Collection info:", JSON.stringify(collInfo[0], null, 2));
+      }
+    } catch (err) {
+      console.log("POST /api/orders - Could not retrieve collection info:", err.message);
+    }
+    
     // Format the data using our schema helper
     const newOrder = createOrderDocument(orderData);
     console.log("POST /api/orders - Formatted order document:", JSON.stringify(newOrder, null, 2));
     
-    // Insert the new order
-    const result = await db.collection("orders").insertOne(newOrder);
-    console.log(`POST /api/orders - Order inserted with ID: ${result.insertedId}`);
+    // Fix common issues that might cause validation failures
+    if (!newOrder.createdAt) newOrder.createdAt = new Date();
+    if (!newOrder.updatedAt) newOrder.updatedAt = new Date();
     
-    return NextResponse.json({ 
-      success: true, 
-      insertedId: result.insertedId,
-      order: newOrder
-    }, { status: 201 });
+    // Ensure items array has required fields
+    if (Array.isArray(newOrder.items)) {
+      newOrder.items = newOrder.items.map(item => ({
+        productId: item.productId || item._id || `prod_${Math.random().toString(36).substring(2, 10)}`,
+        name: item.name || "Product",
+        price: parseFloat(item.price) || 0,
+        quantity: parseInt(item.quantity) || 1,
+        total: parseFloat(item.total) || parseFloat(item.price * item.quantity) || 0
+      }));
+    }
+    
+    // Ensure proper types for numeric fields
+    newOrder.total = parseFloat(newOrder.total) || 0;
+    newOrder.subtotal = parseFloat(newOrder.subtotal) || 0;
+    newOrder.tax = parseFloat(newOrder.tax) || 0;
+    newOrder.shipping = parseFloat(newOrder.shipping) || 0;
+    
+    // Try to insert without validation first to see if it works
+    try {
+      // Insert the new order
+      const result = await db.collection("orders").insertOne(newOrder);
+      console.log(`POST /api/orders - Order inserted with ID: ${result.insertedId}`);
+      
+      return NextResponse.json({ 
+        success: true, 
+        insertedId: result.insertedId,
+        order: newOrder
+      }, { status: 201 });
+    } catch (insertError) {
+      console.error("POST /api/orders - Insert error:", insertError);
+
+      // Add more diagnostic info to the error message
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Document failed validation',
+          details: insertError.message,
+          errorCode: insertError.code,
+          document: newOrder 
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("POST /api/orders - Database error:", error);
     return NextResponse.json(

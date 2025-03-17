@@ -141,37 +141,25 @@ export default function CheckoutPage() {
       
       // Save order to database
       try {
-        // Prepare order data for MongoDB
+        // Prepare order data for MongoDB - simplified structure to avoid validation issues
         const orderData = {
-          customer: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
-          },
+          orderId: `ORD-${Math.floor(Math.random() * 1000000)}`,
+          customer: formData.name,
+          email: formData.email,
+          phone: formData.phone,
           items: cartItems.map(item => ({
             productId: item.id || item._id,
             name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            total: item.price * item.quantity
+            price: Number(item.price),
+            quantity: Number(item.quantity)
           })),
-          total: calculateTotal(),
-          subtotal: calculateTotal(),
-          tax: 0, // You can add tax calculation later
-          shipping: 0, // You can add shipping cost calculation later
+          total: Number(calculateTotal()),
+          subtotal: Number(calculateTotal()),
           status: 'Pending',
-          shippingAddress: {
-            line1: formData.address,
-            city: formData.city,
-            state: formData.state,
-            postalCode: formData.zipCode,
-            country: 'US'
-          },
-          paymentInfo: {
-            method: 'Venmo/Cash',
-            status: 'Pending'
-          },
-          notes: formData.notes || ''
+          address: fullAddress,
+          paymentMethod: 'Venmo/Cash',
+          notes: formData.notes || '',
+          createdAt: new Date()
         };
         
         console.log('Saving order to database:', orderData);
