@@ -36,16 +36,6 @@ export default function Home() {
         <div className="container-custom">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-8 md:mb-0">
-              <div className="relative h-32 w-full max-w-sm mb-6">
-                <Image
-                  src="/images/TactaLogo_image001.png"
-                  alt="Tacta Slime Company Logo"
-                  fill
-                  className="object-contain object-left"
-                  priority
-                  quality={100}
-                />
-              </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
                 Welcome to Tacta Slime Company
               </h1>
