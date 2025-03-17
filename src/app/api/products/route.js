@@ -1,33 +1,34 @@
+import { connectToDatabase } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
-import clientPromise, { connectToDatabase } from '@/lib/mongodb';
-import { createProductDocument } from '@/models/schemas';
 
 // GET handler to fetch all products
 export async function GET() {
+  console.log('API: GET /api/products called');
+  
   try {
-    // Use the connectToDatabase function which handles potential issues
-    const { client, db } = await connectToDatabase();
+    // Connect to the database
+    const { db, error } = await connectToDatabase();
     
-    // Handle the case where db is null
+    // Check if we have a connection
     if (!db) {
-      console.error("Database connection failed");
+      console.error('API: Database connection failed in /api/products:', error?.message || 'Unknown reason');
       return NextResponse.json(
-        { success: false, message: "Failed to connect to database. Please check your MongoDB configuration." },
+        { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }
       );
     }
     
-    // Get all products
-    const products = await db.collection("products").find({}).toArray();
+    // Get all products from the database
+    const products = await db.collection('products').find({}).toArray();
+    console.log(`API: Successfully fetched ${products.length} products`);
     
-    return NextResponse.json({ 
-      success: true, 
-      products 
-    });
+    // Return the products as JSON
+    return NextResponse.json(products);
   } catch (error) {
-    console.error("Database error:", error);
+    console.error('API: Error in /api/products:', error.message);
+    // Ensure we return a proper JSON response even in error cases
     return NextResponse.json(
-      { success: false, message: error.message },
+      { error: 'Failed to fetch products', details: error.message },
       { status: 500 }
     );
   }
@@ -35,52 +36,30 @@ export async function GET() {
 
 // POST handler to add a new product
 export async function POST(request) {
+  console.log('API: POST /api/products called');
+  
   try {
-    // Use the connectToDatabase function which handles potential issues
-    const { client, db } = await connectToDatabase();
+    const { db, error } = await connectToDatabase();
     
-    // Handle the case where db is null
     if (!db) {
-      console.error("Database connection failed");
+      console.error('API: Database connection failed in POST /api/products:', error?.message || 'Unknown reason');
       return NextResponse.json(
-        { success: false, message: "Failed to connect to database. Please check your MongoDB configuration." },
+        { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }
       );
     }
     
-    // Parse the JSON body from the request
-    const productData = await request.json();
+    const body = await request.json();
+    console.log('API: Product data received:', body);
     
-    console.log("Received product data:", JSON.stringify(productData));
+    const result = await db.collection('products').insertOne(body);
+    console.log('API: Product created with ID:', result.insertedId);
     
-    // Create a clean product object with required fields
-    const newProduct = {
-      name: productData.name || '',
-      description: productData.description || '',
-      price: parseFloat(productData.price || 0),
-      inventory: parseInt(productData.inventory || 0, 10),
-      category: productData.category || 'Uncategorized',
-      featured: !!productData.featured,
-      imagePath: productData.imagePath || '/images/products/default.jpg',
-      sold_out: parseInt(productData.inventory || 0, 10) <= 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    console.log("Cleaned product data:", JSON.stringify(newProduct));
-    
-    // Insert the new product
-    const result = await db.collection("products").insertOne(newProduct);
-    
-    return NextResponse.json({ 
-      success: true, 
-      insertedId: result.insertedId,
-      product: newProduct
-    }, { status: 201 });
+    return NextResponse.json({ success: true, insertedId: result.insertedId }, { status: 201 });
   } catch (error) {
-    console.error("Database error:", error);
+    console.error('API: Error in POST /api/products:', error.message);
     return NextResponse.json(
-      { success: false, message: error.message },
+      { error: 'Failed to create product', details: error.message },
       { status: 500 }
     );
   }

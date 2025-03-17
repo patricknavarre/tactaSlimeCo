@@ -1,34 +1,37 @@
+import { connectToDatabase } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
-import clientPromise, { connectToDatabase } from '@/lib/mongodb';
-import { settingsSchema, createDefaultSettings } from '@/models/schemas';
 
 // GET handler - Fetch settings
-export async function GET(request) {
+export async function GET() {
+  console.log('API: GET /api/settings called');
+  
   try {
-    // Use the connectToDatabase function which handles potential issues
-    const { client, db } = await connectToDatabase();
+    // Connect to the database
+    const { db, error } = await connectToDatabase();
     
-    // Handle the case where db is null
+    // Check if we have a connection
     if (!db) {
-      console.error("Database connection failed");
+      console.error('API: Database connection failed in /api/settings:', error?.message || 'Unknown reason');
       return NextResponse.json(
-        { error: "Failed to connect to database. Please check your MongoDB configuration." },
+        { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }
       );
     }
     
-    const settings = await db.collection('settings').findOne({});
+    // Get theme settings from the database
+    const settings = await db.collection('settings').findOne({ type: 'theme' }) || { 
+      primaryColor: '#ff407d', 
+      secondaryColor: '#6c48c9',
+      type: 'theme'
+    };
     
-    // If no settings exist, create default settings
-    if (!settings) {
-      const defaultSettings = createDefaultSettings();
-      await db.collection('settings').insertOne(defaultSettings);
-      return NextResponse.json(defaultSettings);
-    }
+    console.log('API: Successfully fetched theme settings');
     
+    // Return the settings as JSON
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
+    console.error('API: Error in /api/settings:', error.message);
+    // Ensure we return a proper JSON response even in error cases
     return NextResponse.json(
       { error: 'Failed to fetch settings', details: error.message },
       { status: 500 }
@@ -38,71 +41,43 @@ export async function GET(request) {
 
 // POST handler - Update settings
 export async function POST(request) {
+  console.log('API: POST /api/settings called');
+  
   try {
-    // Use the connectToDatabase function which handles potential issues
-    const { client, db } = await connectToDatabase();
+    const { db, error } = await connectToDatabase();
     
-    // Handle the case where db is null
     if (!db) {
-      console.error("Database connection failed");
+      console.error('API: Database connection failed in POST /api/settings:', error?.message || 'Unknown reason');
       return NextResponse.json(
-        { error: "Failed to connect to database. Please check your MongoDB configuration." },
+        { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }
       );
     }
     
-    const data = await request.json();
+    const body = await request.json();
+    console.log('API: Settings data received:', body);
     
-    // Validate settings data
-    // TODO: Add validation logic here
-    
-    // Check if settings already exist
-    const existingSettings = await db.collection('settings').findOne({});
-    
-    if (existingSettings) {
-      // Update existing settings
-      const updateResult = await db.collection('settings').updateOne(
-        { _id: existingSettings._id },
-        { $set: { ...data, updatedAt: new Date() } }
-      );
-      
-      if (updateResult.modifiedCount === 1) {
-        const updatedSettings = await db.collection('settings').findOne({ _id: existingSettings._id });
-        return NextResponse.json({
-          message: 'Settings updated successfully',
-          settings: updatedSettings
-        });
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to update settings' },
-          { status: 500 }
-        );
-      }
-    } else {
-      // Create new settings
-      const newSettings = {
-        ...createDefaultSettings(),
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      const insertResult = await db.collection('settings').insertOne(newSettings);
-      
-      if (insertResult.acknowledged) {
-        return NextResponse.json({
-          message: 'Settings created successfully',
-          settings: newSettings
-        });
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to create settings' },
-          { status: 500 }
-        );
-      }
+    // Ensure we have a type field
+    if (!body.type) {
+      body.type = 'theme';
     }
+    
+    // Update the settings with upsert
+    const result = await db.collection('settings').updateOne(
+      { type: body.type },
+      { $set: body },
+      { upsert: true }
+    );
+    
+    console.log('API: Settings updated');
+    
+    return NextResponse.json({ 
+      success: true, 
+      modifiedCount: result.modifiedCount,
+      upsertedId: result.upsertedId
+    });
   } catch (error) {
-    console.error('Error updating settings:', error);
+    console.error('API: Error in POST /api/settings:', error.message);
     return NextResponse.json(
       { error: 'Failed to update settings', details: error.message },
       { status: 500 }

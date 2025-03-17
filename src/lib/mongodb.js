@@ -23,8 +23,13 @@ if (!MONGODB_URI) {
   try {
     console.log('🔌 Attempting to connect to MongoDB...');
     
+    // Add shorter timeout settings to prevent 504 errors
     const options = {
       useUnifiedTopology: true,
+      connectTimeoutMS: 5000,  // 5 seconds
+      socketTimeoutMS: 30000,  // 30 seconds
+      serverSelectionTimeoutMS: 5000, // 5 seconds
+      maxPoolSize: 10,  // Limit concurrent connections
     };
     
     if (process.env.NODE_ENV === 'development') {
@@ -77,7 +82,15 @@ export async function connectToDatabase() {
       return { client: null, db: null };
     }
     
-    const client = await clientPromise;
+    // Add a timeout for the client promise
+    const clientWithTimeout = Promise.race([
+      clientPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 5000)
+      )
+    ]);
+    
+    const client = await clientWithTimeout;
     
     if (!client) {
       console.error('⚠️ Failed to get MongoDB client');
