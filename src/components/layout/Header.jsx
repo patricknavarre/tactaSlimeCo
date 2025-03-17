@@ -57,6 +57,12 @@ const Header = () => {
               <span className="nav-bubble">About Us</span>
             </Link>
             <Link 
+              href="/faq" 
+              className={`nav-link ${isActive('/faq') ? 'nav-link-active' : ''}`}
+            >
+              <span className="nav-bubble">FAQ</span>
+            </Link>
+            <Link 
               href="/contact" 
               className={`nav-link ${isActive('/contact') ? 'nav-link-active' : ''}`}
             >
@@ -99,6 +105,13 @@ const Header = () => {
               onClick={closeMenu}
             >
               <span className="nav-bubble-mobile">About Us</span>
+            </Link>
+            <Link 
+              href="/faq" 
+              className={`nav-link-mobile ${isActive('/faq') ? 'nav-link-mobile-active' : ''}`}
+              onClick={closeMenu}
+            >
+              <span className="nav-bubble-mobile">FAQ</span>
             </Link>
             <Link 
               href="/contact" 
