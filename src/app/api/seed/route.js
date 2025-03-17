@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import clientPromise, { connectToDatabase } from '@/lib/mongodb';
 
 // Sample product data
 const productsData = [
@@ -60,9 +60,26 @@ const productsData = [
 ];
 
 export async function GET(request) {
+  // Skip execution during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('Build phase detected, skipping database operations in /api/seed');
+    return NextResponse.json({ 
+      success: true, 
+      message: `Build phase - seed API skipped`,
+    });
+  }
+  
   try {
-    const client = await clientPromise;
-    const db = client.db("tactaSlime");
+    const { client, db } = await connectToDatabase();
+    
+    // Check if we're in build mode and handle it gracefully
+    if (!client || !db) {
+      console.log('Database connection not available, skipping seed operation');
+      return NextResponse.json({ 
+        success: false, 
+        message: `Database connection not available during build`,
+      }, { status: 503 });
+    }
     
     // Get authorization header from request 
     const authHeader = request.headers.get('authorization');

@@ -1,17 +1,32 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import clientPromise, { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET() {
+  // Skip execution during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('Build phase detected, skipping database operations in /api/test-db');
+    return NextResponse.json({ 
+      success: true, 
+      message: `Build phase - test DB API skipped`,
+    });
+  }
+  
   try {
     console.log("API route: Testing MongoDB connection...");
     
-    // Try to connect to the client
-    const client = await clientPromise;
-    console.log("Connection to client successful");
+    // Use the connectToDatabase function which handles build-time scenarios
+    const { client, db } = await connectToDatabase();
     
-    // Connect to the test database
-    const db = client.db("test");
-    console.log("Connected to 'test' database");
+    // Handle null client gracefully
+    if (!client || !db) {
+      console.log('Database connection not available during build');
+      return NextResponse.json({ 
+        success: false, 
+        message: "Database connection not available during build",
+      }, { status: 503 });
+    }
+    
+    console.log("Connection to client successful");
     
     // Simple query to verify connection
     const testCollection = await db.collection("test").findOne({});
