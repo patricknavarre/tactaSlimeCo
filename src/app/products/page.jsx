@@ -36,18 +36,38 @@ function ProductsContent() {
     async function fetchProducts() {
       try {
         setLoading(true);
+        console.log('Attempting to fetch products from API...');
         const response = await fetch('/api/products');
-        const data = await response.json();
         
-        if (data.success && data.products) {
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API response received:', data);
+        
+        // Our updated API now returns products directly as an array
+        if (Array.isArray(data)) {
+          console.log(`Successfully loaded ${data.length} products`);
+          setProducts(data);
+        } 
+        // Handle legacy format or error response format
+        else if (data.products) {
+          console.log(`Successfully loaded ${data.products.length} products (legacy format)`);
           setProducts(data.products);
-        } else {
-          console.error('Failed to fetch products:', data.message);
-          setError('Failed to load products. Please try again later.');
+        } 
+        // Handle error format
+        else if (data.error) {
+          console.error('Server returned error:', data.error, data.details);
+          setError(`Server error: ${data.error}. ${data.details || ''}`);
+        }
+        else {
+          console.error('Unexpected data format:', data);
+          setError('Received unexpected data format from server.');
         }
       } catch (error) {
         console.error('Error fetching products:', error);
-        setError('An error occurred while loading products.');
+        setError(`Failed to load products: ${error.message}`);
       } finally {
         setLoading(false);
       }
