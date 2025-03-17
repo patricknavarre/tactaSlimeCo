@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -154,10 +155,28 @@ export default function CheckoutPage() {
   
   // Redirect if cart is empty (when page loads)
   useEffect(() => {
-    if (cartItems.length === 0 && !showModal) {
-      router.push('/products');
-    }
+    // Add a small delay to ensure cart state is loaded
+    const timer = setTimeout(() => {
+      setIsLoadingCart(false);
+      if (cartItems.length === 0 && !showModal) {
+        console.log('Cart is empty, redirecting to products');
+        router.push('/products');
+      }
+    }, 500); // 500ms delay should be enough for cart state to load
+    
+    return () => clearTimeout(timer);
   }, [cartItems, router, showModal]);
+  
+  // Show loading state while cart is being checked
+  if (isLoadingCart) {
+    return (
+      <Layout>
+        <div className="container-custom py-12 flex justify-center items-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tacta-pink"></div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>

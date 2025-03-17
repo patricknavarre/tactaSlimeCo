@@ -159,7 +159,6 @@ export default function CartDrawer() {
                 <div className="space-y-2">
                   <Link
                     href="/checkout"
-                    onClick={toggleCart}
                     className="btn-primary cartoon-btn w-full block text-center"
                   >
                     Checkout
