@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { CartProvider } from '@/context/CartContext';
 
 const ThemeContext = createContext({});
 
@@ -103,7 +104,9 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, loading }}>
-      {children}
+      <CartProvider>
+        {children}
+      </CartProvider>
     </ThemeContext.Provider>
   );
 }
