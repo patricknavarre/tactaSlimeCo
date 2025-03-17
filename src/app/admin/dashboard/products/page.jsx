@@ -30,14 +30,16 @@ export default function ProductsManagement() {
       console.log('Admin: API response received:', data);
       
       // Handle different response formats
+      let processedProducts = [];
+      
       if (Array.isArray(data)) {
         // New API format returns products directly as an array
         console.log(`Admin: Successfully loaded ${data.length} products (array format)`);
-        setProducts(data);
+        processedProducts = data;
       } else if (data.success && data.products) {
         // Legacy format with success and products properties
         console.log(`Admin: Successfully loaded ${data.products.length} products (legacy format)`);
-        setProducts(data.products);
+        processedProducts = data.products;
       } else if (data.error) {
         // Error format
         console.error('Admin: Server returned error:', data.error, data.details);
@@ -46,6 +48,21 @@ export default function ProductsManagement() {
         console.error('Admin: Unexpected data format:', data);
         alert('Received unexpected data format from server.');
       }
+      
+      // Inspect the products array structure
+      console.log('Admin: Products array structure:', processedProducts);
+      console.log('Admin: First product (if exists):', processedProducts[0]);
+      console.log('Admin: Product array length:', processedProducts.length);
+      
+      // Ensure all products have an _id property
+      const productsWithId = processedProducts.map(product => {
+        if (!product._id && product.id) {
+          return { ...product, _id: product.id };
+        }
+        return product;
+      });
+      
+      setProducts(productsWithId);
     } catch (error) {
       console.error('Admin: Error fetching products:', error);
       alert(`Failed to load products: ${error.message}`);
@@ -224,6 +241,7 @@ export default function ProductsManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {console.log('Rendering products table, products.length:', products.length)}
                     {products.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
@@ -231,79 +249,82 @@ export default function ProductsManagement() {
                         </td>
                       </tr>
                     ) : (
-                      products.map((product) => (
-                        <tr key={product._id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 bg-tacta-cream rounded-md flex items-center justify-center text-xs text-gray-500">
-                                {product.image ? (
-                                  <img 
-                                    src={product.image} 
-                                    alt={product.name} 
-                                    className="h-10 w-10 object-cover rounded-md"
-                                  />
+                      products.map((product, index) => {
+                        console.log(`Rendering product ${index}:`, product);
+                        return (
+                          <tr key={product._id || `product-${index}`}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="h-10 w-10 bg-tacta-cream rounded-md flex items-center justify-center text-xs text-gray-500">
+                                  {product.image ? (
+                                    <img 
+                                      src={product.image} 
+                                      alt={product.name || 'Product'} 
+                                      className="h-10 w-10 object-cover rounded-md"
+                                    />
+                                  ) : (
+                                    'Image'
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{product.name || 'Unnamed Product'}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">${typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{product.inventory || 0}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                product.category?.includes('Cloud') || product.category?.includes('Glitter') 
+                                  ? 'bg-tacta-pink-light text-tacta-pink' 
+                                  : 'bg-tacta-peach-light text-tacta-peach'
+                              }`}>
+                                {product.category || 'Uncategorized'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {product.featured ? (
+                                  <span className="inline-flex items-center text-green-600">
+                                    <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Yes
+                                  </span>
                                 ) : (
-                                  'Image'
+                                  <span className="inline-flex items-center text-gray-500">
+                                    <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    No
+                                  </span>
                                 )}
                               </div>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <div className="flex justify-end space-x-2">
+                                <Link href={`/admin/dashboard/products/edit/${product._id || index}`} className="text-tacta-pink hover:text-tacta-pink-light">
+                                  Edit
+                                </Link>
+                                <Link href={`/products/${product._id || index}`} className="text-gray-500 hover:text-gray-700">
+                                  View
+                                </Link>
+                                <button 
+                                  className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  onClick={() => handleDeleteProduct(product._id)}
+                                  disabled={deletingProductId === product._id}
+                                >
+                                  {deletingProductId === product._id ? 'Deleting...' : 'Delete'}
+                                </button>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">${product.price?.toFixed(2)}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{product.inventory}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              product.category?.includes('Cloud') || product.category?.includes('Glitter') 
-                                ? 'bg-tacta-pink-light text-tacta-pink' 
-                                : 'bg-tacta-peach-light text-tacta-peach'
-                            }`}>
-                              {product.category}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {product.featured ? (
-                                <span className="inline-flex items-center text-green-600">
-                                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  Yes
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center text-gray-500">
-                                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                  No
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="flex justify-end space-x-2">
-                              <Link href={`/admin/dashboard/products/edit/${product._id}`} className="text-tacta-pink hover:text-tacta-pink-light">
-                                Edit
-                              </Link>
-                              <Link href={`/products/${product._id}`} className="text-gray-500 hover:text-gray-700">
-                                View
-                              </Link>
-                              <button 
-                                className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={() => handleDeleteProduct(product._id)}
-                                disabled={deletingProductId === product._id}
-                              >
-                                {deletingProductId === product._id ? 'Deleting...' : 'Delete'}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -312,31 +333,49 @@ export default function ProductsManagement() {
               {/* Pagination */}
               <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                 <div className="flex-1 flex justify-between sm:hidden">
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  <button 
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    disabled={products.length === 0}
+                  >
                     Previous
                   </button>
-                  <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  <button 
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    disabled={products.length === 0}
+                  >
                     Next
                   </button>
                 </div>
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm text-gray-700">
-                      Showing <span className="font-medium">1</span> to <span className="font-medium">6</span> of <span className="font-medium">6</span> results
-                    </p>
+                    {products.length > 0 ? (
+                      <p className="text-sm text-gray-700">
+                        Showing <span className="font-medium">1</span> to <span className="font-medium">{products.length}</span> of <span className="font-medium">{products.length}</span> results
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-700">No products found</p>
+                    )}
                   </div>
                   <div>
                     <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        disabled={products.length === 0}
+                      >
                         <span className="sr-only">Previous</span>
                         <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                           <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </button>
-                      <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-tacta-pink-light text-sm font-medium text-tacta-pink">
-                        1
-                      </button>
-                      <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      {products.length > 0 ? (
+                        <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-tacta-pink-light text-sm font-medium text-tacta-pink">
+                          1
+                        </button>
+                      ) : null}
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        disabled={products.length === 0}
+                      >
                         <span className="sr-only">Next</span>
                         <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
