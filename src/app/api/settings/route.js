@@ -7,11 +7,18 @@ export async function GET() {
   
   try {
     // Connect to the database
-    const { db, error } = await connectToDatabase();
+    const { db, error, fallbackData } = await connectToDatabase();
     
     // Check if we have a connection
     if (!db) {
       console.error('API: Database connection failed in /api/settings:', error?.message || 'Unknown reason');
+      
+      // If we have fallback data, return it
+      if (fallbackData && fallbackData.settings) {
+        console.log('API: Returning fallback settings data');
+        return NextResponse.json(fallbackData.settings);
+      }
+      
       return NextResponse.json(
         { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }

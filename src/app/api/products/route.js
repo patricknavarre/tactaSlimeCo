@@ -7,11 +7,18 @@ export async function GET() {
   
   try {
     // Connect to the database
-    const { db, error } = await connectToDatabase();
+    const { db, error, fallbackData } = await connectToDatabase();
     
     // Check if we have a connection
     if (!db) {
       console.error('API: Database connection failed in /api/products:', error?.message || 'Unknown reason');
+      
+      // If we have fallback data, return it
+      if (fallbackData && fallbackData.products) {
+        console.log('API: Returning fallback products data');
+        return NextResponse.json(fallbackData.products);
+      }
+      
       return NextResponse.json(
         { error: 'Database connection failed', details: error?.message || 'Unknown error' },
         { status: 500 }
@@ -21,6 +28,19 @@ export async function GET() {
     // Get all products from the database
     const products = await db.collection('products').find({}).toArray();
     console.log(`API: Successfully fetched ${products.length} products`);
+    
+    // If no products found, provide fallback for testing
+    if (!products || products.length === 0) {
+      console.log('API: No products found in database, returning demo product');
+      return NextResponse.json([{
+        _id: 'demo1',
+        name: 'Demo Slime Product',
+        description: 'This is a demo product when no products are in the database',
+        price: 9.99,
+        inventory: 10,
+        imagePath: '/images/products/default-slime.jpg'
+      }]);
+    }
     
     // Return the products as JSON
     return NextResponse.json(products);
