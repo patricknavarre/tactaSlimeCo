@@ -19,16 +19,36 @@ export default function ProductsManagement() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
+      console.log('Admin: Fetching products from API...');
       const response = await fetch('/api/products');
-      const data = await response.json();
       
-      if (data.success && data.products) {
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Admin: API response received:', data);
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        // New API format returns products directly as an array
+        console.log(`Admin: Successfully loaded ${data.length} products (array format)`);
+        setProducts(data);
+      } else if (data.success && data.products) {
+        // Legacy format with success and products properties
+        console.log(`Admin: Successfully loaded ${data.products.length} products (legacy format)`);
         setProducts(data.products);
+      } else if (data.error) {
+        // Error format
+        console.error('Admin: Server returned error:', data.error, data.details);
+        alert(`Error loading products: ${data.error}. ${data.details || ''}`);
       } else {
-        console.error('Failed to fetch products:', data.message);
+        console.error('Admin: Unexpected data format:', data);
+        alert('Received unexpected data format from server.');
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Admin: Error fetching products:', error);
+      alert(`Failed to load products: ${error.message}`);
     } finally {
       setIsLoading(false);
     }

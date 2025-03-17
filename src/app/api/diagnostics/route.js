@@ -77,6 +77,23 @@ export async function GET() {
     };
   }
   
+  // Add troubleshooting information
+  diagnostics.troubleshooting = {
+    possibleIssues: [
+      "MongoDB_URI environment variable not set or incorrect",
+      "MongoDB Atlas IP access restrictions",
+      "Database credentials invalid or expired",
+      "Network connectivity issues between Vercel and MongoDB Atlas",
+      "Database name incorrect in connection string"
+    ],
+    recommendations: [
+      "Double-check the MONGODB_URI value in Vercel environment variables",
+      "Ensure MongoDB Atlas IP access list includes 0.0.0.0/0 (allow all)",
+      "Try creating a new database user with a simple password",
+      "Check that your MongoDB cluster is active and running"
+    ]
+  };
+  
   // Return diagnostic information
   return NextResponse.json(diagnostics);
 } 
