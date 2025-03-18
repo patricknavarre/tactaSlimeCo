@@ -9,9 +9,19 @@ import { usePathname } from 'next/navigation';
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   
   // Function to check if a link is active
   const isActive = (path) => pathname === path;
+
+  // Function to check if products nav item should show as active
+  const isProductsActive = () => {
+    return pathname === '/products' || 
+           pathname === '/products/best-sellers' || 
+           pathname === '/products/new-arrivals' || 
+           pathname === '/products/sale-items' ||
+           pathname.startsWith('/products/');
+  };
   
   // Toggle mobile menu
   const toggleMenu = () => {
@@ -21,6 +31,11 @@ const Header = () => {
   // Close menu when a link is clicked
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  // Toggle products dropdown
+  const toggleProductsDropdown = () => {
+    setIsProductsDropdownOpen(!isProductsDropdownOpen);
   };
   
   return (
@@ -44,21 +59,61 @@ const Header = () => {
           </div>
           
           <div className="hidden md:flex space-x-4">
-            <Link 
-              href="/products" 
-              className={`
-                inline-block px-6 py-2 rounded-full font-bold 
-                text-tacta-pink bg-white
-                border-2 border-black border-b-4 border-r-4
-                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
-                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
-                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
-                active:border-b-2 active:border-r-2
-                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
-                ${isActive('/products') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
-              `}>
+            {/* Products dropdown */}
+            <div className="relative">
+              <button
+                onClick={toggleProductsDropdown}
+                className={`
+                  inline-block px-6 py-2 rounded-full font-bold 
+                  text-tacta-pink bg-white
+                  border-2 border-black border-b-4 border-r-4
+                  shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                  hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                  active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                  active:border-b-2 active:border-r-2
+                  transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                  ${isProductsActive() ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+                `}
+                aria-expanded={isProductsDropdownOpen}
+              >
                 Products
-              </Link>
+                <span className="ml-1">▾</span>
+              </button>
+              
+              {/* Products dropdown menu */}
+              {isProductsDropdownOpen && (
+                <div 
+                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 border-2 border-gray-200 border-b-4 border-r-4 border-black py-2"
+                  onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                >
+                  <Link 
+                    href="/products" 
+                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  >
+                    All Products
+                  </Link>
+                  <Link 
+                    href="/products/best-sellers" 
+                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  >
+                    Best Sellers
+                  </Link>
+                  <Link 
+                    href="/products/new-arrivals" 
+                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  >
+                    New Arrivals
+                  </Link>
+                  <Link 
+                    href="/products/sale-items" 
+                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  >
+                    Sale Items
+                  </Link>
+                </div>
+              )}
+            </div>
+            
             <Link 
               href="/about" 
               className={`
@@ -71,9 +126,10 @@ const Header = () => {
                 active:border-b-2 active:border-r-2
                 transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
                 ${isActive('/about') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
-              `}>
-                About Us
-              </Link>
+              `}
+            >
+              About Us
+            </Link>
             <Link 
               href="/faq" 
               className={`
@@ -86,9 +142,10 @@ const Header = () => {
                 active:border-b-2 active:border-r-2
                 transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
                 ${isActive('/faq') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
-              `}>
-                FAQ
-              </Link>
+              `}
+            >
+              FAQ
+            </Link>
             <Link 
               href="/contact" 
               className={`
@@ -101,9 +158,10 @@ const Header = () => {
                 active:border-b-2 active:border-r-2
                 transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
                 ${isActive('/contact') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
-              `}>
-                Contact
-              </Link>
+              `}
+            >
+              Contact
+            </Link>
           </div>
           
           <div className="flex space-x-4 items-center">
@@ -143,7 +201,58 @@ const Header = () => {
               `}
               onClick={closeMenu}
             >
-              Products
+              All Products
+            </Link>
+            <Link 
+              href="/products/best-sellers" 
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold ml-4
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/products/best-sellers') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
+              onClick={closeMenu}
+            >
+              Best Sellers
+            </Link>
+            <Link 
+              href="/products/new-arrivals" 
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold ml-4
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/products/new-arrivals') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
+              onClick={closeMenu}
+            >
+              New Arrivals
+            </Link>
+            <Link 
+              href="/products/sale-items" 
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold ml-4
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/products/sale-items') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
+              onClick={closeMenu}
+            >
+              Sale Items
             </Link>
             <Link 
               href="/about" 
@@ -236,7 +345,7 @@ const Header = () => {
         }
         
         .mobile-menu-open {
-          max-height: 300px;
+          max-height: 500px;
           opacity: 1;
         }
       `}</style>
