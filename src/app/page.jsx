@@ -114,9 +114,9 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-8 text-center">
             Our Featured Slimes
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="card group relative">
+              <div key={product.id} className="card group transition duration-300 bg-white rounded-lg border-2 border-gray-200 hover:border-tacta-pink hover:shadow-xl shadow-md relative overflow-hidden transform hover:-translate-y-1">
                 <div className="absolute top-2 left-2 z-10">
                   <span className="bg-tacta-peach text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
                     Featured
@@ -137,9 +137,15 @@ export default function Home() {
                     <span className="font-semibold text-lg">${product.price.toFixed(2)}</span>
                     <motion.button 
                       onClick={() => handleQuickAdd(product)}
-                      className="btn-primary cartoon-btn text-sm"
+                      className="btn-primary cartoon-btn text-sm px-4 py-2 font-bold text-white w-full sm:w-auto"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      style={{
+                        backgroundColor: "#ff7bac",
+                        color: "white",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                        boxShadow: "0 4px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)"
+                      }}
                     >
                       Add to Cart
                     </motion.button>

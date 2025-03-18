@@ -231,9 +231,9 @@ function ProductsContent() {
                 onClick={() => handleCategoryClick(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium 
                   ${category === activeCategory 
-                    ? 'bg-tacta-pink text-white' 
-                    : 'bg-white text-gray-700 hover:bg-tacta-pink hover:text-white'} 
-                  transition-colors shadow-sm`}
+                    ? 'bg-tacta-pink text-white border-b-4 border-r-4 border-[#D03176] transform rotate-[0.5deg]' 
+                    : 'bg-white text-gray-700 hover:bg-tacta-pink hover:text-white border-2 border-b-4 border-r-4 border-gray-200 hover:border-[#D03176]'} 
+                  transition-all shadow-sm`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -281,7 +281,7 @@ function ProductsContent() {
           </motion.button>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           <AnimatePresence>
             {filteredProducts.map((product) => (
               <motion.div
@@ -291,7 +291,7 @@ function ProductsContent() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                className="card group transition duration-300 hover:shadow-xl border border-tacta-pink-light hover:border-tacta-pink relative"
+                className="card group transition duration-300 bg-white rounded-lg border-2 border-gray-200 hover:border-tacta-pink hover:shadow-xl shadow-md relative overflow-hidden transform hover:-translate-y-1"
               >
                 <Link 
                   href={`/products/${product._id || product.id}`}
@@ -352,12 +352,6 @@ function ProductsContent() {
                         }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        style={{
-                          backgroundColor: "#ff7bac",
-                          color: "white",
-                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                          boxShadow: "0 4px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)"
-                        }}
                       >
                         {product.inventory === 0 ? 'Sold Out' : 'Add to Cart'}
                       </motion.button>

@@ -29,7 +29,7 @@ const Header = () => {
         <nav className="flex items-center justify-between">
           <div className="flex-shrink-0">
             <Link href="/" aria-label="Tacta Slime Company Home">
-              <div className="relative h-20 w-64 md:h-24 md:w-72">
+              <div className="relative h-20 w-64 md:h-24 md:w-72 bg-white p-2 rounded-lg shadow-sm">
                 {/* Updated to use the new logo */}
                 <Image
                   src="/images/TactaLogo_image002.png"
@@ -46,35 +46,71 @@ const Header = () => {
           <div className="hidden md:flex space-x-4">
             <Link 
               href="/products" 
-              className={`nav-link ${isActive('/products') ? 'nav-link-active' : ''}`}
-            >
-              <span className="nav-bubble">Products</span>
-            </Link>
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/products') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}>
+                Products
+              </Link>
             <Link 
               href="/about" 
-              className={`nav-link ${isActive('/about') ? 'nav-link-active' : ''}`}
-            >
-              <span className="nav-bubble">About Us</span>
-            </Link>
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/about') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}>
+                About Us
+              </Link>
             <Link 
               href="/faq" 
-              className={`nav-link ${isActive('/faq') ? 'nav-link-active' : ''}`}
-            >
-              <span className="nav-bubble">FAQ</span>
-            </Link>
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/faq') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}>
+                FAQ
+              </Link>
             <Link 
               href="/contact" 
-              className={`nav-link ${isActive('/contact') ? 'nav-link-active' : ''}`}
-            >
-              <span className="nav-bubble">Contact</span>
-            </Link>
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/contact') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}>
+                Contact
+              </Link>
           </div>
           
           <div className="flex space-x-4 items-center">
             <CartIcon />
             
             <button 
-              className="md:hidden mobile-menu-btn"
+              className="md:hidden bg-white rounded-full p-2 shadow-[0_4px_0_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.1)] text-tacta-pink transform transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-[0_6px_0_rgba(0,0,0,0.1),0_3px_8px_rgba(0,0,0,0.1)] active:translate-y-1 active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]"
               onClick={toggleMenu}
               aria-expanded={isMenuOpen}
               aria-label="Toggle navigation menu"
@@ -94,31 +130,71 @@ const Header = () => {
           <div className="flex flex-col space-y-3">
             <Link 
               href="/products" 
-              className={`nav-link-mobile ${isActive('/products') ? 'nav-link-mobile-active' : ''}`}
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/products') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
               onClick={closeMenu}
             >
-              <span className="nav-bubble-mobile">Products</span>
+              Products
             </Link>
             <Link 
               href="/about" 
-              className={`nav-link-mobile ${isActive('/about') ? 'nav-link-mobile-active' : ''}`}
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/about') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
               onClick={closeMenu}
             >
-              <span className="nav-bubble-mobile">About Us</span>
+              About Us
             </Link>
             <Link 
               href="/faq" 
-              className={`nav-link-mobile ${isActive('/faq') ? 'nav-link-mobile-active' : ''}`}
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/faq') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
               onClick={closeMenu}
             >
-              <span className="nav-bubble-mobile">FAQ</span>
+              FAQ
             </Link>
             <Link 
               href="/contact" 
-              className={`nav-link-mobile ${isActive('/contact') ? 'nav-link-mobile-active' : ''}`}
+              className={`
+                inline-block px-6 py-2 rounded-full font-bold 
+                text-tacta-pink bg-white
+                border-2 border-black border-b-4 border-r-4
+                shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)]
+                hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)]
+                active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]
+                active:border-b-2 active:border-r-2
+                transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
+                ${isActive('/contact') ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
+              `}
               onClick={closeMenu}
             >
-              <span className="nav-bubble-mobile">Contact</span>
+              Contact
             </Link>
           </div>
         </div>
@@ -127,74 +203,22 @@ const Header = () => {
       {/* Overlay for mobile menu */}
       {isMenuOpen && (
         <div 
-          className="menu-overlay" 
+          className="fixed inset-0 bg-black bg-opacity-30 z-10 animation-fadeIn"
           onClick={closeMenu}
           aria-hidden="true"
         ></div>
       )}
       
       <style jsx>{`
-        .nav-link {
-          position: relative;
-          transform: translateY(0);
-          transition: all 0.2s ease;
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
         
-        .nav-link:hover {
-          transform: translateY(-2px);
+        .animation-fadeIn {
+          animation: fadeIn 0.2s ease;
         }
         
-        .nav-bubble {
-          display: inline-block;
-          padding: 0.5rem 1rem;
-          border-radius: 9999px;
-          font-weight: bold;
-          font-size: 1rem;
-          background-color: #fff6f9;
-          color: #ff7bac;
-          border: 2px solid #ffc0d9;
-          box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
-          transition: all 0.2s ease;
-        }
-        
-        .nav-link:hover .nav-bubble {
-          background-color: #ffebf3;
-          box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .nav-link-active .nav-bubble {
-          background-color: #ffd6e7;
-          border-color: #ff7bac;
-          box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
-        }
-        
-        .mobile-menu-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background-color: #fff6f9;
-          color: #ff7bac;
-          border: 2px solid #ffc0d9;
-          border-radius: 9999px;
-          box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
-          transition: all 0.2s ease;
-          z-index: 30;
-        }
-        
-        .mobile-menu-btn:hover {
-          background-color: #ffebf3;
-          box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
-          transform: translateY(-2px);
-        }
-        
-        .mobile-menu-btn:active {
-          transform: translateY(1px);
-          box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Mobile Menu Styles */
         .mobile-menu {
           position: absolute;
           top: 100%;
@@ -214,47 +238,6 @@ const Header = () => {
         .mobile-menu-open {
           max-height: 300px;
           opacity: 1;
-        }
-        
-        .nav-link-mobile {
-          display: block;
-          padding: 0.5rem 0;
-          transition: all 0.2s ease;
-        }
-        
-        .nav-bubble-mobile {
-          display: inline-block;
-          padding: 0.5rem 1rem;
-          border-radius: 9999px;
-          font-weight: bold;
-          font-size: 1rem;
-          background-color: #fff6f9;
-          color: #ff7bac;
-          border: 2px solid #ffc0d9;
-          box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
-          transition: all 0.2s ease;
-        }
-        
-        .nav-link-mobile-active .nav-bubble-mobile {
-          background-color: #ffd6e7;
-          border-color: #ff7bac;
-          box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
-        }
-        
-        .menu-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.3);
-          z-index: 10;
-          animation: fadeIn 0.2s ease;
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
         }
       `}</style>
     </header>
