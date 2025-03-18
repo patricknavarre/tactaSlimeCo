@@ -24,7 +24,7 @@ const Header = () => {
   };
   
   return (
-    <header className="bg-white shadow-sm relative">
+    <header className="bg-gradient-to-r from-[#FF1493] to-[#FF7F50] shadow-md relative">
       <div className="container-custom py-4">
         <nav className="flex items-center justify-between">
           <div className="flex-shrink-0">
