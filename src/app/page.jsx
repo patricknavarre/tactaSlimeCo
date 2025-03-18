@@ -1,9 +1,50 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
+import { useCart } from '@/context/CartContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
+  const cart = useCart();
+  const [quickAddProduct, setQuickAddProduct] = useState(null);
+
+  // Debug log to confirm cart context is available
+  useEffect(() => {
+    console.log("Cart context in Home:", cart);
+  }, [cart]);
+
+  // Function to handle adding a product to cart
+  const handleQuickAdd = (product) => {
+    if (!cart || !cart.addToCart) {
+      console.error("Cart context is not available or missing addToCart function");
+      return;
+    }
+
+    setQuickAddProduct(product);
+    
+    // Create a complete product object
+    const productToAdd = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      description: product.description,
+      quantity: 1
+    };
+    
+    // Add to cart with explicit logging
+    console.log("Adding to cart from homepage:", productToAdd);
+    cart.addToCart(productToAdd, 1);
+    
+    // Reset animation after a delay
+    setTimeout(() => {
+      setQuickAddProduct(null);
+    }, 1500);
+  };
+
   // In a real application, these would come from the database
   const featuredProducts = [
     {
@@ -94,11 +135,37 @@ export default function Home() {
                   <p className="text-gray-600 mb-2 text-sm">{product.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-lg">${product.price.toFixed(2)}</span>
-                    <button className="btn-primary cartoon-btn text-sm">
+                    <motion.button 
+                      onClick={() => handleQuickAdd(product)}
+                      className="btn-primary cartoon-btn text-sm"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       Add to Cart
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
+                
+                {/* Added to Cart Animation */}
+                <AnimatePresence>
+                  {quickAddProduct && quickAddProduct.id === product.id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, y: -20 }}
+                      className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center"
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 10, 0] }}
+                        transition={{ duration: 0.5 }}
+                        className="text-tacta-pink text-4xl mb-2"
+                      >
+                        🎉
+                      </motion.div>
+                      <p className="font-bold text-tacta-pink">Added to Cart!</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
