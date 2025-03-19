@@ -67,7 +67,7 @@ function SaleItemsContent() {
       id: product._id,
       name: product.name,
       price: product.price,
-      image: product.images && product.images.length > 0 ? product.images[0].url : null,
+      imagePath: product.imagePath || '/images/products/default.jpg',
       description: product.description,
       quantity: 1
     };

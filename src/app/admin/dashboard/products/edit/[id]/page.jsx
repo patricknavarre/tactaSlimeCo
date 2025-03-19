@@ -76,8 +76,8 @@ export default function EditProductPage({ params }) {
       };
       
       // Handle image path if present
-      if (data.image) {
-        productData.imagePath = data.image;
+      if (data.imagePath) {
+        productData.imagePath = data.imagePath;
       }
       
       // Add shopify ID only if it exists and isn't empty

@@ -31,8 +31,8 @@ export default function NewProductPage() {
       };
       
       // Handle image path if present
-      if (data.image) {
-        productData.imagePath = data.image;
+      if (data.imagePath) {
+        productData.imagePath = data.imagePath;
       } else {
         productData.imagePath = '/images/products/default.jpg';
       }

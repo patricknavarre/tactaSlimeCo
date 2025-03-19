@@ -255,12 +255,12 @@ export default function ProductsManagement() {
                           <tr key={product._id || `product-${index}`}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <div className="h-10 w-10 bg-tacta-cream rounded-md flex items-center justify-center text-xs text-gray-500">
-                                  {product.image ? (
+                                <div className="h-10 w-10 bg-tacta-cream rounded-md flex items-center justify-center text-xs text-gray-500 overflow-hidden">
+                                  {product.imagePath ? (
                                     <img 
-                                      src={product.image} 
+                                      src={product.imagePath} 
                                       alt={product.name || 'Product'} 
-                                      className="h-10 w-10 object-cover rounded-md"
+                                      className="h-full w-full object-cover"
                                     />
                                   ) : (
                                     'Image'

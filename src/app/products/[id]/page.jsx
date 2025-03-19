@@ -128,7 +128,7 @@ export default function ProductDetail({ params }) {
   }
   
   // Product display with real data
-  const productImage = product.image || (product.images && product.images[0] ? product.images[0].url : '/images/placeholder.jpg');
+  const productImage = product.imagePath || (product.images && product.images[0] ? product.images[0].url : '/images/placeholder.jpg');
   
   return (
     <Layout>
@@ -173,10 +173,17 @@ export default function ProductDetail({ params }) {
             transition={{ duration: 0.5 }}
           >
             <div className="relative pt-[100%]">
-              {/* This would be an actual image in production */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl font-bold text-gray-500">{product.name} Image Placeholder</span>
-              </div>
+              {productImage ? (
+                <img
+                  src={productImage}
+                  alt={product.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-xl font-bold text-gray-500">{product.name} Image Placeholder</span>
+                </div>
+              )}
             </div>
           </motion.div>
           

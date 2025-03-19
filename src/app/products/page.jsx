@@ -135,7 +135,7 @@ function ProductsContent() {
       name: product.name,
       price: product.price,
       category: product.category,
-      image: product.image,
+      imagePath: product.imagePath || '/images/products/default.jpg',
       description: product.description,
       inventory: product.inventory,
       quantity: 1
@@ -296,12 +296,19 @@ function ProductsContent() {
                 <Link 
                   href={`/products/${product._id || product.id}`}
                   className="block"
-                > 
+                >
                   <div className="relative h-64 bg-gradient-to-br from-white to-tacta-cream">
-                    {/* This would be an actual image in production */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm text-gray-500">{product.name} Image</span>
-                    </div>
+                    {product.imagePath ? (
+                      <img
+                        src={product.imagePath}
+                        alt={product.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm text-gray-500">{product.name} Image</span>
+                      </div>
+                    )}
                     
                     {product.featured && (
                       <div className="absolute top-2 left-2">

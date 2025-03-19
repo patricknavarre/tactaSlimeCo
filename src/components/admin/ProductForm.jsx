@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const ProductForm = ({ product, onSubmit, isSubmitting }) => {
-  const [previewImage, setPreviewImage] = useState(product?.images?.[0]?.url || '');
+  const [previewImage, setPreviewImage] = useState(product?.imagePath || '');
+  const [uploadError, setUploadError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   
   const { 
     register, 
     handleSubmit, 
     formState: { errors },
-    watch
+    watch,
+    setValue
   } = useForm({
     defaultValues: {
       name: product?.name || '',
@@ -16,26 +19,81 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
       price: product?.price || '',
       inventory: product?.inventory || 0,
       category: product?.category || '',
-      featured: product?.featured || false
+      featured: product?.featured || false,
+      imagePath: product?.imagePath || ''
     }
   });
   
   const watchPrice = watch('price');
   const watchName = watch('name');
   
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploading(true);
+      setUploadError('');
+
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append('file', file);
+
+      console.log('Uploading file:', file.name);
+      
+      // Upload the file
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log('Upload response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+
+      if (!data.success || !data.imagePath) {
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Setting imagePath:', data.imagePath);
+      // Set the imagePath in the form
+      setValue('imagePath', data.imagePath);
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError('Failed to upload image: ' + error.message);
+      setPreviewImage('');
+    } finally {
+      setIsUploading(false);
     }
   };
-  
+
+  const handleFormSubmit = async (data) => {
+    // Ensure we have the image path
+    console.log('Form data before submit:', data);
+    
+    if (!data.imagePath && previewImage) {
+      console.error('Image path is missing but preview exists');
+      setUploadError('Please wait for image upload to complete');
+      return;
+    }
+
+    // Call the parent's onSubmit
+    await onSubmit(data);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8 divide-y divide-gray-200">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left column - Main info */}
         <div className="md:col-span-2 space-y-6">
@@ -186,7 +244,6 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
               <div className="space-y-4 text-center">
                 {previewImage ? (
                   <div className="relative mx-auto w-full h-48 rounded-md overflow-hidden bg-gray-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={previewImage}
                       alt={watchName || 'Product preview'}
@@ -194,7 +251,10 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setPreviewImage('')}
+                      onClick={() => {
+                        setPreviewImage('');
+                        setValue('imagePath', '');
+                      }}
                       className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
                     >
                       <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,25 +279,37 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                   </svg>
                 )}
                 
-                <div className="flex justify-center text-sm text-gray-600">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-tacta-pink hover:text-tacta-pink-light"
-                  >
-                    <span>Upload an image</span>
-                    <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="sr-only"
-                    />
-                  </label>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex justify-center text-sm text-gray-600">
+                    <label
+                      htmlFor="file-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-tacta-pink hover:text-tacta-pink-light disabled:opacity-50"
+                    >
+                      <span>{isUploading ? 'Uploading...' : 'Upload an image'}</span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        disabled={isUploading}
+                        className="sr-only"
+                      />
+                    </label>
+                  </div>
+                  {uploadError && (
+                    <p className="text-sm text-red-600">{uploadError}</p>
+                  )}
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                 </div>
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
               </div>
             </div>
+            
+            {/* Hidden input for imagePath */}
+            <input
+              type="hidden"
+              {...register('imagePath')}
+            />
           </div>
           
           <div className="mt-6">
