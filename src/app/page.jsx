@@ -10,11 +10,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function Home() {
   const cart = useCart();
   const [quickAddProduct, setQuickAddProduct] = useState(null);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   // Debug log to confirm cart context is available
   useEffect(() => {
     console.log("Cart context in Home:", cart);
   }, [cart]);
+
+  // Fetch featured products from API
+  useEffect(() => {
+    async function fetchFeaturedProducts() {
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        // Filter for featured products only
+        const featured = Array.isArray(data) ? data.filter(product => product.featured) : [];
+        setFeaturedProducts(featured);
+      } catch (error) {
+        console.error('Error fetching featured products:', error);
+      }
+    }
+    
+    fetchFeaturedProducts();
+  }, []);
 
   // Function to handle adding a product to cart
   const handleQuickAdd = (product) => {
@@ -45,207 +67,275 @@ export default function Home() {
     }, 1500);
   };
 
-  // In a real application, these would come from the database
-  const featuredProducts = [
-    {
-      id: 1,
-      name: 'Butter Slime - Strawberry',
-      price: 12.99,
-      image: '/images/slime-butter.jpg',
-      description: 'Smooth butter slime with a delicious strawberry scent.'
-    },
-    {
-      id: 2,
-      name: 'Glitter Galaxy Slime',
-      price: 15.99,
-      image: '/images/slime-galaxy.jpg',
-      description: 'Mesmerizing galaxy slime filled with holographic glitter.'
-    },
-    {
-      id: 3,
-      name: 'Video Game Slime',
-      price: 14.99,
-      image: '/images/slime-video-game.jpg',
-      description: 'Colorful slime inspired by retro video games with a fun texture.'
+  // Animation variants for staggered children
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
     }
-  ];
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-tacta-pink-light to-tacta-peach-light py-16">
-        <div className="container-custom">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 mb-8 md:mb-0">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-tacta-pink via-tacta-peach to-[#FFB6C1]">
+        <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-10 animate-float"></div>
+        <div className="container-custom relative z-10">
+          <motion.div 
+            className="flex flex-col md:flex-row items-center gap-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="md:w-1/2">
+              <motion.h1 
+                className="text-5xl md:text-7xl font-bold mb-6 text-white text-shadow-lg"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 Welcome to Tacta Slime Company
-              </h1>
-              <p className="text-lg mb-6 text-gray-700">
+              </motion.h1>
+              <motion.p 
+                className="text-xl mb-8 text-white text-shadow-sm"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
                 Experience the joy of playing with premium handmade slime. Our slimes are made with high-quality ingredients for the most satisfying sensory experience.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/products" className="btn-primary cartoon-btn">
+              </motion.p>
+              <motion.div 
+                className="flex flex-wrap gap-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Link href="/products" className="btn-primary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
                   Shop Now
                 </Link>
-                <Link href="/about" className="btn-secondary cartoon-btn">
+                <Link href="/about" className="btn-secondary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
                   Learn More
                 </Link>
-              </div>
+              </motion.div>
             </div>
-            <div className="md:w-1/2 flex justify-center">
-              <div className="relative w-full max-w-md h-80 bg-white rounded-lg shadow-lg overflow-hidden">
-                {/* Note: In a production environment, replace this with an actual hero image */}
-                <div className="absolute inset-0 bg-gradient-to-br from-tacta-pink to-tacta-peach opacity-50"></div>
+            <motion.div 
+              className="md:w-1/2 flex justify-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+            >
+              <div className="relative w-full max-w-lg aspect-square rounded-full bg-white/20 backdrop-blur-lg p-8 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
                 <div className="absolute inset-0 flex items-center justify-center text-center p-4">
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-2xl font-bold text-white text-shadow-lg">
                     Hero Image<br />
-                    <span className="text-sm font-normal">(Add product images to public/images folder)</span>
+                    <span className="text-lg font-normal">(Add product images to public/images folder)</span>
                   </span>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="py-16">
-        <div className="container-custom">
-          <h2 className="text-3xl font-bold mb-8 text-center">
+      <section className="py-24 bg-gradient-to-b from-white to-tacta-cream">
+        <motion.div 
+          className="container-custom"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+        >
+          <motion.h2 
+            className="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-tacta-pink to-tacta-peach bg-clip-text text-transparent"
+            variants={itemVariants}
+          >
             Our Featured Slimes
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
+          </motion.h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 max-w-7xl mx-auto">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="card group transition duration-300 bg-white rounded-lg border-2 border-gray-200 hover:border-tacta-pink hover:shadow-xl shadow-md relative overflow-hidden transform hover:-translate-y-1">
-                <div className="absolute top-2 left-2 z-10">
-                  <span className="bg-tacta-peach text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
-                    Featured
-                  </span>
-                </div>
-                <div className="relative h-64 bg-tacta-cream">
-                  {/* This would be an actual image in production */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-sm text-gray-500">{product.name} Image</span>
+              <motion.div 
+                key={product._id}
+                variants={itemVariants}
+                className="group relative"
+              >
+                <div className="card bg-white rounded-2xl border-2 border-gray-100 hover:border-tacta-pink overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="bg-gradient-to-r from-tacta-pink to-tacta-peach text-white text-sm px-4 py-1 rounded-full uppercase tracking-wider font-semibold shadow-lg">
+                      Featured
+                    </span>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-tacta-pink transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 mb-2 text-sm">{product.description}</p>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="font-semibold text-lg">${product.price.toFixed(2)}</span>
-                    <motion.button 
-                      onClick={() => handleQuickAdd(product)}
-                      className="btn-primary cartoon-btn text-sm px-4 py-2 font-bold text-white w-full sm:w-auto"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      style={{
-                        backgroundColor: "#ff7bac",
-                        color: "white",
-                        textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                        boxShadow: "0 4px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)"
-                      }}
-                    >
-                      Add to Cart
-                    </motion.button>
+                  <div className="relative h-72 bg-gradient-to-br from-tacta-cream to-white overflow-hidden">
+                    {product.imagePath ? (
+                      <Image
+                        src={product.imagePath}
+                        alt={product.name}
+                        fill
+                        className="object-cover transform group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-lg text-gray-500">{product.name} Image</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-                
-                {/* Added to Cart Animation */}
-                <AnimatePresence>
-                  {quickAddProduct && quickAddProduct.id === product.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.5, y: -20 }}
-                      className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center"
-                    >
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 10, 0] }}
-                        transition={{ duration: 0.5 }}
-                        className="text-tacta-pink text-4xl mb-2"
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-tacta-pink transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 mb-4">{product.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl font-bold text-tacta-pink">${product.price.toFixed(2)}</span>
+                      <motion.button 
+                        onClick={() => handleQuickAdd(product)}
+                        className="btn-primary cartoon-btn px-6 py-3 font-bold text-white"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        disabled={product.inventory <= 0}
                       >
-                        🎉
+                        {product.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      </motion.button>
+                    </div>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {quickAddProduct && quickAddProduct._id === product._id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center"
+                      >
+                        <motion.div
+                          animate={{ 
+                            rotate: [0, 10, -10, 10, 0],
+                            scale: [1, 1.2, 1.2, 1.2, 1]
+                          }}
+                          transition={{ duration: 0.5 }}
+                          className="text-6xl mb-4"
+                        >
+                          🎉
+                        </motion.div>
+                        <motion.p 
+                          initial={{ y: 20 }}
+                          animate={{ y: 0 }}
+                          className="font-bold text-xl text-tacta-pink"
+                        >
+                          Added to Cart!
+                        </motion.p>
                       </motion.div>
-                      <p className="font-bold text-tacta-pink">Added to Cart!</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
             ))}
           </div>
-          <div className="text-center mt-12">
-            <Link href="/products" className="btn-secondary cartoon-btn">
+          <motion.div 
+            className="text-center mt-16"
+            variants={itemVariants}
+          >
+            <Link href="/products" className="btn-secondary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform inline-block">
               View All Products
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Benefits Section */}
-      <section className="bg-tacta-cream py-16">
-        <div className="container-custom">
-          <h2 className="text-3xl font-bold mb-12 text-center">
+      <section className="py-24 bg-gradient-to-b from-tacta-cream to-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-5"></div>
+        <motion.div 
+          className="container-custom relative z-10"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+        >
+          <motion.h2 
+            className="text-4xl md:text-5xl font-bold mb-16 text-center bg-gradient-to-r from-tacta-pink to-tacta-peach bg-clip-text text-transparent"
+            variants={itemVariants}
+          >
             Why Choose Tacta Slime?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-tacta-pink rounded-full flex items-center justify-center mb-4">
-                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
-              <p className="text-gray-700">
-                We use only the finest ingredients to create long-lasting, high-quality slimes that maintain their texture.
-              </p>
-            </div>
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-tacta-peach rounded-full flex items-center justify-center mb-4">
-                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Safe Ingredients</h3>
-              <p className="text-gray-700">
-                All our slimes are made with non-toxic ingredients that are safe for children and adults alike.
-              </p>
-            </div>
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-tacta-pink-light rounded-full flex items-center justify-center mb-4">
-                <svg className="h-8 w-8 text-tacta-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Unique Designs</h3>
-              <p className="text-gray-700">
-                Each slime is handcrafted with unique colors, scents, and textures that you won't find anywhere else.
-              </p>
-            </div>
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              {
+                icon: "✨",
+                title: "Premium Quality",
+                description: "We use only the finest ingredients to create long-lasting, high-quality slimes that maintain their texture."
+              },
+              {
+                icon: "🛡️",
+                title: "Safe Ingredients",
+                description: "All our slimes are made with non-toxic ingredients that are safe for children and adults alike."
+              },
+              {
+                icon: "🎨",
+                title: "Unique Designs",
+                description: "Each slime is handcrafted with unique colors, scents, and textures that you won't find anywhere else."
+              }
+            ].map((benefit, index) => (
+              <motion.div 
+                key={index}
+                className="text-center"
+                variants={itemVariants}
+              >
+                <div className="relative mx-auto w-24 h-24 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-tacta-pink to-tacta-peach rounded-2xl rotate-6"></div>
+                  <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center text-4xl">
+                    {benefit.icon}
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-800">{benefit.title}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {benefit.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-16">
-        <div className="container-custom max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Join Our Slime Club</h2>
-          <p className="text-lg mb-8">
+      <section className="py-24 bg-gradient-to-br from-tacta-pink via-tacta-peach to-[#FFB6C1] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-10"></div>
+        <motion.div 
+          className="container-custom max-w-4xl mx-auto text-center relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white text-shadow-lg">Join Our Slime Club</h2>
+          <p className="text-xl mb-12 text-white text-shadow-sm">
             Subscribe to our newsletter for exclusive deals, new releases, and slime tips!
           </p>
           <form className="flex flex-col sm:flex-row gap-4 justify-center">
             <input
               type="email"
               placeholder="Your email address"
-              className="input-field sm:flex-1 max-w-md"
+              className="input-field sm:flex-1 max-w-md text-lg px-6 py-4 rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-md text-white placeholder-white/70 focus:outline-none focus:border-white/40 transition-colors"
               required
             />
-            <button type="submit" className="btn-primary cartoon-btn whitespace-nowrap">
+            <motion.button 
+              type="submit" 
+              className="btn-primary cartoon-btn text-lg px-8 py-4 whitespace-nowrap"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               Subscribe Now
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </section>
     </Layout>
   );

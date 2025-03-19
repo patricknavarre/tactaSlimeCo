@@ -44,13 +44,12 @@ const Header = () => {
         <nav className="flex items-center justify-between">
           <div className="flex-shrink-0">
             <Link href="/" aria-label="Tacta Slime Company Home">
-              <div className="relative h-20 w-64 md:h-24 md:w-72 bg-white p-2 rounded-lg shadow-sm">
-                {/* Updated to use the new logo */}
+              <div className="relative h-24 w-24 md:h-32 md:w-32 bg-white rounded-full p-2 shadow-lg transform hover:scale-105 transition-transform duration-300 border-4 border-white overflow-hidden hover:shadow-2xl">
                 <Image
                   src="/images/TactaLogo_image002.png"
                   alt="Tacta Slime Company Logo"
                   fill
-                  className="object-contain"
+                  className="object-contain p-1"
                   priority
                   quality={100}
                 />
