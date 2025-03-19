@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CartIcon from '@/components/cart/CartIcon';
@@ -11,6 +11,11 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   
+  // Close dropdown when pathname changes
+  useEffect(() => {
+    setIsProductsDropdownOpen(false);
+  }, [pathname]);
+
   // Function to check if a link is active
   const isActive = (path) => pathname === path;
 
@@ -34,10 +39,21 @@ const Header = () => {
   };
 
   // Toggle products dropdown
-  const toggleProductsDropdown = () => {
+  const toggleProductsDropdown = (e) => {
+    e.preventDefault(); // Prevent any navigation
     setIsProductsDropdownOpen(!isProductsDropdownOpen);
   };
-  
+
+  // Handle mouse enter for dropdown
+  const handleDropdownMouseEnter = () => {
+    setIsProductsDropdownOpen(true);
+  };
+
+  // Handle mouse leave for dropdown
+  const handleDropdownMouseLeave = () => {
+    setIsProductsDropdownOpen(false);
+  };
+
   return (
     <header className="bg-gradient-to-r from-[#FF1493] to-[#FF7F50] shadow-md relative">
       <div className="container-custom py-4">
@@ -59,7 +75,11 @@ const Header = () => {
           
           <div className="hidden md:flex space-x-4">
             {/* Products dropdown */}
-            <div className="relative">
+            <div 
+              className="relative"
+              onMouseEnter={handleDropdownMouseEnter}
+              onMouseLeave={handleDropdownMouseLeave}
+            >
               <button
                 onClick={toggleProductsDropdown}
                 className={`
@@ -83,29 +103,32 @@ const Header = () => {
               {isProductsDropdownOpen && (
                 <div 
                   className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 border-2 border-gray-200 border-b-4 border-r-4 border-black py-2"
-                  onMouseLeave={() => setIsProductsDropdownOpen(false)}
                 >
                   <Link 
                     href="/products" 
                     className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                    onClick={() => setIsProductsDropdownOpen(false)}
                   >
                     All Products
                   </Link>
                   <Link 
                     href="/products/best-sellers" 
                     className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                    onClick={() => setIsProductsDropdownOpen(false)}
                   >
                     Best Sellers
                   </Link>
                   <Link 
                     href="/products/new-arrivals" 
                     className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                    onClick={() => setIsProductsDropdownOpen(false)}
                   >
                     New Arrivals
                   </Link>
                   <Link 
                     href="/products/sale-items" 
                     className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                    onClick={() => setIsProductsDropdownOpen(false)}
                   >
                     Sale Items
                   </Link>
