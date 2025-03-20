@@ -51,14 +51,16 @@ export default function Home() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        console.log('Fetching content from:', `${API_URL}/api/content`);
-        const response = await fetch(`${API_URL}/api/content`);
+        console.log('Starting to fetch content...');
+        const response = await fetch('/api/content');
+        console.log('Response status:', response.status);
         const data = await response.json();
         
-        console.log('Content API Response:', data);
+        console.log('Raw API Response:', data);
+        console.log('Hero Image Path:', data?.content?.home?.heroImagePath);
         
         if (data.success && data.content) {
-          console.log('Setting content:', data.content);
+          console.log('Setting content with hero image:', data.content.home.heroImagePath);
           setContent(data.content);
         } else {
           console.error('Content API returned unsuccessful response:', data);
@@ -74,6 +76,7 @@ export default function Home() {
   // Debug log for content updates
   useEffect(() => {
     console.log('Current content state:', content);
+    console.log('Current hero image path:', content?.home?.heroImagePath);
   }, [content]);
 
   // Function to handle adding a product to cart
