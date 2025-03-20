@@ -13,8 +13,14 @@ export async function GET() {
       console.error('GET /api/content: Database connection failed:', error);
       return NextResponse.json({ 
         success: false, 
-        error: 'Database connection failed' 
-      }, { status: 500 });
+        error: 'Database connection failed. Please check MongoDB configuration.',
+        details: error?.message || 'No database connection available'
+      }, { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     console.log('GET /api/content: Connected to database, fetching content');
@@ -40,13 +46,32 @@ export async function GET() {
         }
       };
       
-      // Insert default content
-      await db.collection('websiteContent').insertOne(defaultContent);
-      return NextResponse.json({ success: true, content: defaultContent });
+      try {
+        // Insert default content
+        await db.collection('websiteContent').insertOne(defaultContent);
+      } catch (insertError) {
+        console.error('Error inserting default content:', insertError);
+      }
+      
+      return NextResponse.json({ 
+        success: true, 
+        content: defaultContent 
+      }, { 
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     console.log('GET /api/content: Content found, returning');
-    return NextResponse.json({ success: true, content });
+    return NextResponse.json({ 
+      success: true, 
+      content 
+    }, { 
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   } catch (error) {
     console.error('GET /api/content: Error:', error);
     return NextResponse.json(
@@ -55,7 +80,12 @@ export async function GET() {
         error: 'Failed to fetch website content',
         details: error.message 
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 }
@@ -63,7 +93,22 @@ export async function GET() {
 // POST handler to update website content
 export async function POST(request) {
   try {
-    const { db } = await connectToDatabase();
+    const { db, error } = await connectToDatabase();
+    
+    if (!db) {
+      console.error('POST /api/content: Database connection failed:', error);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Database connection failed. Please check MongoDB configuration.',
+        details: error?.message || 'No database connection available'
+      }, { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
     const formData = await request.formData();
     
     // Handle hero image upload if present
@@ -96,7 +141,7 @@ export async function POST(request) {
         heroTitle: formData.get('heroTitle'),
         heroSubtitle: formData.get('heroSubtitle'),
         heroButtonText: formData.get('heroButtonText'),
-        heroImagePath: heroImagePath || formData.get('currentHeroImagePath'),
+        heroImagePath: heroImagePath || formData.get('heroImagePath') || '',
         featuredTitle: formData.get('featuredTitle'),
         featuredSubtitle: formData.get('featuredSubtitle'),
       },
@@ -109,6 +154,15 @@ export async function POST(request) {
       updatedAt: new Date()
     };
     
+    // Get existing content to preserve any fields not in the form
+    const existingContent = await db.collection('websiteContent').findOne({});
+    if (existingContent) {
+      // Preserve existing hero image path if no new image is uploaded
+      if (!heroImagePath && existingContent.home?.heroImagePath) {
+        content.home.heroImagePath = existingContent.home.heroImagePath;
+      }
+    }
+    
     // Update or insert content
     const result = await db.collection('websiteContent').updateOne(
       {},
@@ -120,12 +174,25 @@ export async function POST(request) {
       success: true, 
       message: 'Website content updated successfully',
       content 
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
   } catch (error) {
     console.error('Error updating website content:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update website content' },
-      { status: 500 }
+      { 
+        success: false, 
+        error: 'Failed to update website content',
+        details: error.message
+      },
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 } 
