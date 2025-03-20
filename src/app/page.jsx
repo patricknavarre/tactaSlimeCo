@@ -51,11 +51,17 @@ export default function Home() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
+        console.log('Fetching content from:', `${API_URL}/api/content`);
         const response = await fetch(`${API_URL}/api/content`);
         const data = await response.json();
         
+        console.log('Content API Response:', data);
+        
         if (data.success && data.content) {
+          console.log('Setting content:', data.content);
           setContent(data.content);
+        } else {
+          console.error('Content API returned unsuccessful response:', data);
         }
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -64,6 +70,11 @@ export default function Home() {
 
     fetchContent();
   }, []);
+
+  // Debug log for content updates
+  useEffect(() => {
+    console.log('Current content state:', content);
+  }, [content]);
 
   // Function to handle adding a product to cart
   const handleQuickAdd = (product) => {
@@ -171,6 +182,7 @@ export default function Home() {
                         className="object-cover"
                         priority
                         quality={100}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
                   </>
@@ -179,8 +191,7 @@ export default function Home() {
                     <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
                     <div className="absolute inset-0 flex items-center justify-center text-center p-4">
                       <span className="text-2xl font-bold text-white text-shadow-lg">
-                        Hero Image<br />
-                        <span className="text-lg font-normal">(Add image in CMS)</span>
+                        No Image Set
                       </span>
                     </div>
                   </>
