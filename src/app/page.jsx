@@ -7,7 +7,9 @@ import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5051';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' 
+  ? 'https://tactaslime.onrender.com'  // Replace with your production API URL
+  : 'http://localhost:5051');
 
 export default function Home() {
   const [content, setContent] = useState({
