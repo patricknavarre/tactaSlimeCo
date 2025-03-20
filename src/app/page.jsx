@@ -7,7 +7,17 @@ import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5051';
+
 export default function Home() {
+  const [content, setContent] = useState({
+    home: {
+      heroTitle: 'Discover the Magic of Tacta Slime',
+      heroSubtitle: 'Handcrafted with love, designed to bring joy',
+      heroButtonText: 'Shop Now',
+      heroImagePath: '',
+    }
+  });
   const cart = useCart();
   const [quickAddProduct, setQuickAddProduct] = useState(null);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -36,6 +46,23 @@ export default function Home() {
     }
     
     fetchFeaturedProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/content`);
+        const data = await response.json();
+        
+        if (data.success && data.content) {
+          setContent(data.content);
+        }
+      } catch (error) {
+        console.error('Error fetching content:', error);
+      }
+    };
+
+    fetchContent();
   }, []);
 
   // Function to handle adding a product to cart
@@ -89,7 +116,7 @@ export default function Home() {
       <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-tacta-pink via-tacta-peach to-[#FFB6C1]">
         <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-10 animate-float"></div>
         <div className="container-custom relative z-10">
-          <motion.div 
+          <motion.div
             className="flex flex-col md:flex-row items-center gap-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -102,7 +129,7 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                Welcome to Tacta Slime Company
+                {content?.home?.heroTitle}
               </motion.h1>
               <motion.p 
                 className="text-xl mb-8 text-white text-shadow-sm"
@@ -110,7 +137,7 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                Experience the joy of playing with premium handmade slime. Our slimes are made with high-quality ingredients for the most satisfying sensory experience.
+                {content?.home?.heroSubtitle}
               </motion.p>
               <motion.div 
                 className="flex flex-wrap gap-6"
@@ -119,7 +146,7 @@ export default function Home() {
                 transition={{ delay: 0.6 }}
               >
                 <Link href="/products" className="btn-primary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
-                  Shop Now
+                  {content?.home?.heroButtonText}
                 </Link>
                 <Link href="/about" className="btn-secondary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
                   Learn More
@@ -133,13 +160,31 @@ export default function Home() {
               transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
             >
               <div className="relative w-full max-w-lg aspect-square rounded-full bg-white/20 backdrop-blur-lg p-8 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
-                <div className="absolute inset-0 flex items-center justify-center text-center p-4">
-                  <span className="text-2xl font-bold text-white text-shadow-lg">
-                    Hero Image<br />
-                    <span className="text-lg font-normal">(Add product images to public/images folder)</span>
-                  </span>
-                </div>
+                {content?.home?.heroImagePath ? (
+                  <>
+                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
+                    <div className="absolute inset-4 rounded-full overflow-hidden">
+                      <Image
+                        src={content.home.heroImagePath}
+                        alt="Hero Image"
+                        fill
+                        className="object-cover"
+                        priority
+                        quality={100}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-center p-4">
+                      <span className="text-2xl font-bold text-white text-shadow-lg">
+                        Hero Image<br />
+                        <span className="text-lg font-normal">(Add image in CMS)</span>
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           </motion.div>

@@ -1,145 +1,127 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5051';
 
 export default function ContentManagement() {
   const [activeTab, setActiveTab] = useState('home');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
-  // Mock content data - in a real app, this would be fetched from the database
-  const [homeContent, setHomeContent] = useState({
-    heroTitle: 'Discover the Magic of Tacta Slime',
-    heroSubtitle: 'Handcrafted with love, designed to bring joy',
-    heroButtonText: 'Shop Now',
-    featuredTitle: 'Our Popular Collections',
-    featuredSubtitle: 'Explore our most loved slimes',
+  const [error, setError] = useState('');
+  const [content, setContent] = useState({
+    home: {
+      heroTitle: '',
+      heroSubtitle: '',
+      heroButtonText: '',
+      heroImagePath: '',
+      featuredTitle: '',
+      featuredSubtitle: '',
+    },
+    about: {
+      heading: '',
+      story: '',
+      missionTitle: '',
+      missionText: '',
+    }
   });
 
-  const [aboutContent, setAboutContent] = useState({
-    heading: 'About Tacta Slime',
-    story: 'Founded in 2020, Tacta Slime started as a passion project and quickly grew into a beloved brand...',
-    missionTitle: 'Our Mission',
-    missionText: 'To create the highest quality slime products that bring joy and sensory satisfaction to people of all ages.',
-  });
+  // Fetch content on component mount
+  useEffect(() => {
+    fetchContent();
+  }, []);
 
-  // Mock FAQs
-  const [faqs, setFaqs] = useState([
-    { 
-      id: 1, 
-      question: 'How long does slime last?', 
-      answer: 'When stored properly in an airtight container, our slime can last for several months. Keep it away from heat and direct sunlight.' 
-    },
-    { 
-      id: 2, 
-      question: 'Are your slimes scented?', 
-      answer: 'Yes! Most of our slimes have coordinating scents that match their theme. You can find scent details in each product description.' 
-    },
-    { 
-      id: 3, 
-      question: 'Is your slime safe for children?', 
-      answer: 'Our slimes are made with non-toxic ingredients, but they are not edible. We recommend adult supervision for children under 8 years old.' 
-    },
-  ]);
-
-  // Mock testimonials
-  const [testimonials, setTestimonials] = useState([
-    {
-      id: 1,
-      name: 'Emma S.',
-      content: 'The cloud slime is absolutely amazing! So fluffy and satisfying to play with.',
-      rating: 5,
-      featured: true,
-    },
-    {
-      id: 2,
-      name: 'Michael J.',
-      content: 'My daughter loves the butter slime. Great texture and holds up well with frequent use.',
-      rating: 5,
-      featured: true,
-    },
-    {
-      id: 3,
-      name: 'Sophia L.',
-      content: 'The glitter galaxy slime is stunning! Beautiful colors and the perfect consistency.',
-      rating: 4,
-      featured: false,
-    },
-  ]);
-
-  // Handle form input changes for different content sections
-  const handleHomeContentChange = (e) => {
-    const { name, value } = e.target;
-    setHomeContent(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleAboutContentChange = (e) => {
-    const { name, value } = e.target;
-    setAboutContent(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Add new FAQ
-  const handleAddFaq = () => {
-    const newId = faqs.length ? Math.max(...faqs.map(faq => faq.id)) + 1 : 1;
-    setFaqs([...faqs, { id: newId, question: '', answer: '' }]);
-  };
-
-  // Update FAQ
-  const handleFaqChange = (id, field, value) => {
-    setFaqs(faqs.map(faq => 
-      faq.id === id ? { ...faq, [field]: value } : faq
-    ));
-  };
-
-  // Delete FAQ
-  const handleDeleteFaq = (id) => {
-    if (confirm('Are you sure you want to delete this FAQ?')) {
-      setFaqs(faqs.filter(faq => faq.id !== id));
+  const fetchContent = async () => {
+    try {
+      console.log('Fetching content...');
+      const response = await fetch(`${API_URL}/api/content`);
+      const data = await response.json();
+      
+      console.log('Content API Response:', data);
+      
+      if (data.success && data.content) {
+        console.log('Setting content:', data.content);
+        setContent(data.content);
+        setError(''); // Clear any existing error
+      } else {
+        console.error('API Error Response:', data);
+        setError(data.error || data.details || 'Failed to fetch content');
+      }
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      setError(`Failed to fetch content: ${error.message}`);
     }
   };
 
-  // Toggle testimonial featured status
-  const handleToggleFeatured = (id) => {
-    setTestimonials(testimonials.map(testimonial => 
-      testimonial.id === id ? { ...testimonial, featured: !testimonial.featured } : testimonial
-    ));
-  };
-
-  // Delete testimonial
-  const handleDeleteTestimonial = (id) => {
-    if (confirm('Are you sure you want to delete this testimonial?')) {
-      setTestimonials(testimonials.filter(testimonial => testimonial.id !== id));
-    }
-  };
-
-  // Form submission handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call to save content
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccessMessage('Content updated successfully!');
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const formData = new FormData();
       
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
-    }, 1000);
+      // Add all form fields to FormData
+      Object.entries(content).forEach(([section, fields]) => {
+        Object.entries(fields).forEach(([key, value]) => {
+          if (key === 'heroImagePath') {
+            formData.append('currentHeroImagePath', value);
+          } else {
+            formData.append(key, value);
+          }
+        });
+      });
+
+      const response = await fetch(`${API_URL}/api/content`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage('Content updated successfully!');
+        fetchContent(); // Refresh content
+      } else {
+        setError(data.error || 'Failed to update content');
+      }
+    } catch (error) {
+      console.error('Error updating content:', error);
+      setError('Failed to update content');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-  
+
+  const handleContentChange = (section, field, value) => {
+    setContent(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setContent(prev => ({
+        ...prev,
+        home: {
+          ...prev.home,
+          heroImage: file
+        }
+      }));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin Header */}
+      {/* Header */}
       <header className="bg-white shadow">
         <div className="container-custom flex justify-between items-center py-4">
           <div className="flex items-center">
@@ -168,430 +150,225 @@ export default function ContentManagement() {
           </div>
         </div>
       </header>
-      
-      {/* Admin Content */}
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-12 gap-8">
-          {/* Sidebar */}
-          <div className="col-span-12 md:col-span-3 lg:col-span-2">
-            <div className="bg-white shadow rounded-lg p-4">
-              <nav className="space-y-2">
-                <Link href="/admin/dashboard" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Dashboard
-                </Link>
-                <Link href="/admin/dashboard/products" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Products
-                </Link>
-                <Link href="/admin/dashboard/orders" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Orders
-                </Link>
-                <Link href="/admin/dashboard/customers" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Customers
-                </Link>
-                <Link href="/admin/dashboard/content" className="block p-2 bg-tacta-pink-light text-tacta-pink rounded-md font-medium">
-                  Content
-                </Link>
-                <Link href="/admin/dashboard/appearance" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Appearance
-                </Link>
-                <Link href="/admin/dashboard/settings" className="block p-2 text-gray-700 hover:bg-tacta-pink-light hover:text-tacta-pink rounded-md">
-                  Settings
-                </Link>
-              </nav>
-            </div>
+
+      {/* Main Content */}
+      <main className="container-custom py-8">
+        <div className="bg-white rounded-lg shadow">
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6" aria-label="Tabs">
+              {['home', 'about'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm capitalize ${
+                    activeTab === tab
+                      ? 'border-tacta-pink text-tacta-pink'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
           </div>
-          
-          {/* Main content */}
-          <div className="col-span-12 md:col-span-9 lg:col-span-10">
-            <div className="bg-white rounded-lg shadow mb-8">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Website Content</h2>
-                <p className="text-sm text-gray-600 mt-1">Manage website content and static pages</p>
+
+          {/* Form */}
+          <div className="p-6">
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                {error}
               </div>
-              
-              {/* Content Tabs */}
-              <div className="px-6 pt-4 border-b border-gray-200">
-                <div className="flex overflow-x-auto">
-                  <button 
-                    onClick={() => setActiveTab('home')}
-                    className={`px-4 py-2 text-sm font-medium rounded-t-lg mr-2 ${
-                      activeTab === 'home' 
-                        ? 'bg-tacta-pink-light text-tacta-pink border-b-2 border-tacta-pink' 
-                        : 'text-gray-600 hover:text-tacta-pink'
-                    }`}
-                  >
-                    Home Page
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('about')}
-                    className={`px-4 py-2 text-sm font-medium rounded-t-lg mr-2 ${
-                      activeTab === 'about' 
-                        ? 'bg-tacta-pink-light text-tacta-pink border-b-2 border-tacta-pink' 
-                        : 'text-gray-600 hover:text-tacta-pink'
-                    }`}
-                  >
-                    About Us
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('faqs')}
-                    className={`px-4 py-2 text-sm font-medium rounded-t-lg mr-2 ${
-                      activeTab === 'faqs' 
-                        ? 'bg-tacta-pink-light text-tacta-pink border-b-2 border-tacta-pink' 
-                        : 'text-gray-600 hover:text-tacta-pink'
-                    }`}
-                  >
-                    FAQs
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('testimonials')}
-                    className={`px-4 py-2 text-sm font-medium rounded-t-lg mr-2 ${
-                      activeTab === 'testimonials' 
-                        ? 'bg-tacta-pink-light text-tacta-pink border-b-2 border-tacta-pink' 
-                        : 'text-gray-600 hover:text-tacta-pink'
-                    }`}
-                  >
-                    Testimonials
-                  </button>
-                </div>
+            )}
+            
+            {successMessage && (
+              <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
+                {successMessage}
               </div>
-              
-              {/* Tab Content */}
-              <div className="p-6">
-                {/* Success message */}
-                {successMessage && (
-                  <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                    {successMessage}
+            )}
+
+            <form onSubmit={handleSubmit}>
+              {/* Home Page Content */}
+              {activeTab === 'home' && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium text-gray-900">Hero Section</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="heroTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        Hero Title
+                      </label>
+                      <input
+                        type="text"
+                        id="heroTitle"
+                        value={content.home.heroTitle}
+                        onChange={(e) => handleContentChange('home', 'heroTitle', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="heroSubtitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        Hero Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        id="heroSubtitle"
+                        value={content.home.heroSubtitle}
+                        onChange={(e) => handleContentChange('home', 'heroSubtitle', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                      />
+                    </div>
                   </div>
-                )}
-                
-                <form onSubmit={handleSubmit}>
-                  {/* Home Page Content */}
-                  {activeTab === 'home' && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Hero Section</h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="heroTitle" className="block text-sm font-medium text-gray-700 mb-1">
-                            Hero Title
-                          </label>
-                          <input
-                            type="text"
-                            id="heroTitle"
-                            name="heroTitle"
-                            value={homeContent.heroTitle}
-                            onChange={handleHomeContentChange}
-                            className="input-field"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="heroSubtitle" className="block text-sm font-medium text-gray-700 mb-1">
-                            Hero Subtitle
-                          </label>
-                          <input
-                            type="text"
-                            id="heroSubtitle"
-                            name="heroSubtitle"
-                            value={homeContent.heroSubtitle}
-                            onChange={handleHomeContentChange}
-                            className="input-field"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="heroButtonText" className="block text-sm font-medium text-gray-700 mb-1">
-                          Button Text
-                        </label>
-                        <input
-                          type="text"
-                          id="heroButtonText"
-                          name="heroButtonText"
-                          value={homeContent.heroButtonText}
-                          onChange={handleHomeContentChange}
-                          className="input-field w-1/3"
-                        />
-                      </div>
-                      
-                      <hr className="my-6" />
-                      
-                      <h3 className="text-lg font-medium text-gray-900">Featured Products Section</h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="featuredTitle" className="block text-sm font-medium text-gray-700 mb-1">
-                            Section Title
-                          </label>
-                          <input
-                            type="text"
-                            id="featuredTitle"
-                            name="featuredTitle"
-                            value={homeContent.featuredTitle}
-                            onChange={handleHomeContentChange}
-                            className="input-field"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="featuredSubtitle" className="block text-sm font-medium text-gray-700 mb-1">
-                            Section Subtitle
-                          </label>
-                          <input
-                            type="text"
-                            id="featuredSubtitle"
-                            name="featuredSubtitle"
-                            value={homeContent.featuredSubtitle}
-                            onChange={handleHomeContentChange}
-                            className="input-field"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end mt-4">
-                        <button 
-                          type="submit" 
-                          className="btn-primary"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
                   
-                  {/* About Us Content */}
-                  {activeTab === 'about' && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">About Us Page</h3>
-                      
-                      <div>
-                        <label htmlFor="heading" className="block text-sm font-medium text-gray-700 mb-1">
-                          Page Heading
-                        </label>
-                        <input
-                          type="text"
-                          id="heading"
-                          name="heading"
-                          value={aboutContent.heading}
-                          onChange={handleAboutContentChange}
-                          className="input-field"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="story" className="block text-sm font-medium text-gray-700 mb-1">
-                          Our Story
-                        </label>
-                        <textarea
-                          id="story"
-                          name="story"
-                          value={aboutContent.story}
-                          onChange={handleAboutContentChange}
-                          rows={4}
-                          className="input-field"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="missionTitle" className="block text-sm font-medium text-gray-700 mb-1">
-                          Mission Title
-                        </label>
-                        <input
-                          type="text"
-                          id="missionTitle"
-                          name="missionTitle"
-                          value={aboutContent.missionTitle}
-                          onChange={handleAboutContentChange}
-                          className="input-field"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="missionText" className="block text-sm font-medium text-gray-700 mb-1">
-                          Mission Text
-                        </label>
-                        <textarea
-                          id="missionText"
-                          name="missionText"
-                          value={aboutContent.missionText}
-                          onChange={handleAboutContentChange}
-                          rows={3}
-                          className="input-field"
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end mt-4">
-                        <button 
-                          type="submit" 
-                          className="btn-primary"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* FAQs Content */}
-                  {activeTab === 'faqs' && (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-gray-900">Frequently Asked Questions</h3>
-                        <button 
-                          type="button" 
-                          onClick={handleAddFaq}
-                          className="btn-secondary text-sm"
-                        >
-                          Add New FAQ
-                        </button>
-                      </div>
-                      
-                      {faqs.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p className="text-gray-500">No FAQs added yet. Click "Add New FAQ" to create one.</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {faqs.map((faq) => (
-                            <div key={faq.id} className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex justify-between items-start mb-2">
-                                <h4 className="text-sm font-medium text-gray-900">FAQ #{faq.id}</h4>
-                                <button 
-                                  type="button" 
-                                  onClick={() => handleDeleteFaq(faq.id)}
-                                  className="text-red-600 hover:text-red-800 text-sm"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                              
-                              <div className="space-y-3">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Question
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={faq.question}
-                                    onChange={(e) => handleFaqChange(faq.id, 'question', e.target.value)}
-                                    className="input-field"
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Answer
-                                  </label>
-                                  <textarea
-                                    value={faq.answer}
-                                    onChange={(e) => handleFaqChange(faq.id, 'answer', e.target.value)}
-                                    rows={3}
-                                    className="input-field"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                  <div>
+                    <label htmlFor="heroButtonText" className="block text-sm font-medium text-gray-700 mb-1">
+                      Button Text
+                    </label>
+                    <input
+                      type="text"
+                      id="heroButtonText"
+                      value={content.home.heroButtonText}
+                      onChange={(e) => handleContentChange('home', 'heroButtonText', e.target.value)}
+                      className="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hero Image
+                    </label>
+                    <div className="flex items-center space-x-4">
+                      {content.home.heroImagePath && (
+                        <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-300">
+                          <Image
+                            src={content.home.heroImagePath}
+                            alt="Hero Image"
+                            fill
+                            className="object-cover"
+                          />
                         </div>
                       )}
-                      
-                      <div className="flex justify-end mt-4">
-                        <button 
-                          type="submit" 
-                          className="btn-primary"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </button>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-tacta-pink-light file:text-tacta-pink hover:file:bg-tacta-pink-light/90"
+                        />
+                        <p className="mt-1 text-sm text-gray-500">
+                          Recommended size: 1200x800px. Max file size: 5MB
+                        </p>
                       </div>
                     </div>
-                  )}
+                  </div>
                   
-                  {/* Testimonials Content */}
-                  {activeTab === 'testimonials' && (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-gray-900">Customer Testimonials</h3>
-                        <button 
-                          type="button" 
-                          className="btn-secondary text-sm"
-                        >
-                          Add New Testimonial
-                        </button>
-                      </div>
-                      
-                      {testimonials.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p className="text-gray-500">No testimonials added yet.</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {testimonials.map((testimonial) => (
-                            <div key={testimonial.id} className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center">
-                                  <h4 className="text-sm font-medium text-gray-900 mr-2">{testimonial.name}</h4>
-                                  <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => (
-                                      <svg 
-                                        key={i} 
-                                        className={`h-4 w-4 ${i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                                        fill="currentColor" 
-                                        viewBox="0 0 20 20"
-                                      >
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                      </svg>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <button 
-                                    type="button" 
-                                    onClick={() => handleToggleFeatured(testimonial.id)}
-                                    className={`px-2 py-1 text-xs rounded-full ${
-                                      testimonial.featured 
-                                        ? 'bg-tacta-pink-light text-tacta-pink' 
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                                  >
-                                    {testimonial.featured ? 'Featured' : 'Make Featured'}
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    onClick={() => handleDeleteTestimonial(testimonial.id)}
-                                    className="text-red-600 hover:text-red-800 text-sm"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-2">
-                                <p className="text-sm text-gray-700">"{testimonial.content}"</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <div className="flex justify-end mt-4">
-                        <button 
-                          type="submit" 
-                          className="btn-primary"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </button>
-                      </div>
+                  <hr className="my-6 border-gray-200" />
+                  
+                  <h3 className="text-lg font-medium text-gray-900">Featured Products Section</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="featuredTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        Featured Title
+                      </label>
+                      <input
+                        type="text"
+                        id="featuredTitle"
+                        value={content.home.featuredTitle}
+                        onChange={(e) => handleContentChange('home', 'featuredTitle', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                      />
                     </div>
-                  )}
-                </form>
+                    
+                    <div>
+                      <label htmlFor="featuredSubtitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        Featured Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        id="featuredSubtitle"
+                        value={content.home.featuredSubtitle}
+                        onChange={(e) => handleContentChange('home', 'featuredSubtitle', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* About Page Content */}
+              {activeTab === 'about' && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium text-gray-900">About Section</h3>
+                  
+                  <div>
+                    <label htmlFor="aboutHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      id="aboutHeading"
+                      value={content.about.heading}
+                      onChange={(e) => handleContentChange('about', 'heading', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="aboutStory" className="block text-sm font-medium text-gray-700 mb-1">
+                      Story
+                    </label>
+                    <textarea
+                      id="aboutStory"
+                      rows={4}
+                      value={content.about.story}
+                      onChange={(e) => handleContentChange('about', 'story', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="missionTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                      Mission Title
+                    </label>
+                    <input
+                      type="text"
+                      id="missionTitle"
+                      value={content.about.missionTitle}
+                      onChange={(e) => handleContentChange('about', 'missionTitle', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="missionText" className="block text-sm font-medium text-gray-700 mb-1">
+                      Mission Text
+                    </label>
+                    <textarea
+                      id="missionText"
+                      rows={4}
+                      value={content.about.missionText}
+                      onChange={(e) => handleContentChange('about', 'missionText', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-tacta-pink text-white rounded-md hover:bg-tacta-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tacta-pink disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 } 
