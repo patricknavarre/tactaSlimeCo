@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
-
 export default function ContentManagement() {
   const [activeTab, setActiveTab] = useState('home');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +34,7 @@ export default function ContentManagement() {
   const fetchContent = async () => {
     try {
       console.log('Fetching content...');
-      const response = await fetch(`${API_URL}/api/content`);
+      const response = await fetch('/api/content');
       const data = await response.json();
       
       console.log('Content API Response:', data);
@@ -67,15 +65,16 @@ export default function ContentManagement() {
       // Add all form fields to FormData
       Object.entries(content).forEach(([section, fields]) => {
         Object.entries(fields).forEach(([key, value]) => {
-          if (key === 'heroImagePath') {
-            formData.append('currentHeroImagePath', value);
-          } else {
-            formData.append(key, value);
-          }
+          formData.append(key, value || '');
         });
       });
 
-      const response = await fetch(`${API_URL}/api/content`, {
+      // Add hero image if present
+      if (content.home.heroImage) {
+        formData.append('heroImage', content.home.heroImage);
+      }
+
+      const response = await fetch('/api/content', {
         method: 'POST',
         body: formData,
       });
@@ -84,7 +83,17 @@ export default function ContentManagement() {
 
       if (data.success) {
         setSuccessMessage('Content updated successfully!');
-        fetchContent(); // Refresh content
+        // Update the content with the new hero image path
+        if (data.content?.home?.heroImagePath) {
+          setContent(prev => ({
+            ...prev,
+            home: {
+              ...prev.home,
+              heroImagePath: data.content.home.heroImagePath,
+              heroImage: null // Clear the file after successful upload
+            }
+          }));
+        }
       } else {
         setError(data.error || 'Failed to update content');
       }
@@ -109,13 +118,19 @@ export default function ContentManagement() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setContent(prev => ({
-        ...prev,
-        home: {
-          ...prev.home,
-          heroImage: file
-        }
-      }));
+      // Preview the image immediately
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setContent(prev => ({
+          ...prev,
+          home: {
+            ...prev.home,
+            heroImage: file,
+            heroImagePath: reader.result // Set temporary preview
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 

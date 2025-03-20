@@ -7,8 +7,6 @@ import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
-
 export default function Home() {
   const [content, setContent] = useState({
     home: {
