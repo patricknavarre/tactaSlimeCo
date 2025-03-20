@@ -171,30 +171,27 @@ export default function Home() {
               transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
             >
               <div className="relative w-full max-w-lg aspect-square rounded-full bg-white/20 backdrop-blur-lg p-8 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
-                {content?.home?.heroImagePath ? (
+                {content?.home?.heroImagePath && content.home.heroImagePath !== '' ? (
                   <>
                     <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
                     <div className="absolute inset-4 rounded-full overflow-hidden">
                       <Image
                         src={content.home.heroImagePath}
-                        alt="Hero Image"
+                        alt="Tacta Slime Hero"
                         fill
                         className="object-cover"
                         priority
                         quality={100}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                       />
                     </div>
                   </>
                 ) : (
-                  <>
-                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
-                    <div className="absolute inset-0 flex items-center justify-center text-center p-4">
-                      <span className="text-2xl font-bold text-white text-shadow-lg">
-                        No Image Set
-                      </span>
-                    </div>
-                  </>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Link href="/admin/dashboard/content" className="text-xl text-white text-center px-6 py-4 rounded-full bg-gradient-to-r from-tacta-pink to-tacta-peach hover:opacity-90 transition-opacity">
+                      Set Hero Image
+                    </Link>
+                  </div>
                 )}
               </div>
             </motion.div>
