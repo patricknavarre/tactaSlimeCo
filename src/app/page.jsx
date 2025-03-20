@@ -187,11 +187,17 @@ export default function Home() {
                     </div>
                   </>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Link href="/admin/dashboard/content" className="text-xl text-white text-center px-6 py-4 rounded-full bg-gradient-to-r from-tacta-pink to-tacta-peach hover:opacity-90 transition-opacity">
-                      Set Hero Image
-                    </Link>
-                  </div>
+                  <>
+                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <span className="text-6xl mb-4 block">✨</span>
+                        <span className="text-xl text-white font-medium">
+                          Discover Our Magical Slimes
+                        </span>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </motion.div>
