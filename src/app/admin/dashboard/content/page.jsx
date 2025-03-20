@@ -4,9 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' 
-  ? 'https://tactaslime.onrender.com'  // Replace with your production API URL
-  : 'http://localhost:5051');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export default function ContentManagement() {
   const [activeTab, setActiveTab] = useState('home');
