@@ -1,6 +1,4 @@
 import { MongoClient } from 'mongodb';
-import fs from 'fs/promises';
-import path from 'path';
 import dotenv from 'dotenv';
 
 // Load environment variables from .env.local
@@ -8,6 +6,16 @@ dotenv.config({ path: '.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB || 'tactaSlime';
+
+// Manual mapping of products to images
+const productImageMap = {
+  'Ice Cream Party': '/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png',
+  'Oops - Game Over': '/images/products/1742428398750-oops_gameover_tactaslime_img_3234.png',
+  'Citrus Storm': '/images/products/1742427971497-icecreamparty_tactaslime_img_3220.png',
+  'Boba Fun Slime': '/images/products/1742428232814-oops_gameover_tactaslime_img_3234.png',
+  'Skincare Sundays Slime': '/images/products/1742427916349-icecreamparty_tactaslime_img_3220.png',
+  'Clear Slime - Ocean Breeze': '/images/products/1742428173172-oops_gameover_tactaslime_img_3234.png'
+};
 
 async function fixProductImages() {
   if (!MONGODB_URI) {
@@ -28,53 +36,26 @@ async function fixProductImages() {
     const allProducts = await products.find({}).toArray();
     console.log(`Found ${allProducts.length} products`);
 
-    // Get list of actual image files
-    const productsDir = path.join(process.cwd(), 'public', 'images', 'products');
-    const files = await fs.readdir(productsDir);
-    console.log(`Found ${files.length} image files`);
-
-    // Create a map of filenames to full paths
-    const imageMap = new Map();
-    files.forEach(file => {
-      imageMap.set(file, `/images/products/${file}`);
-    });
-
     // Update each product's image path
     for (const product of allProducts) {
-      // Find the most recent image file for this product
-      const productImages = Array.from(imageMap.entries())
-        .filter(([filename]) => filename.includes(product.name.toLowerCase().replace(/\s+/g, '')))
-        .sort((a, b) => b[0].localeCompare(a[0])); // Sort by filename (most recent first)
-
-      if (productImages.length > 0) {
-        const newPath = productImages[0][1];
+      const imagePath = productImageMap[product.name];
+      
+      if (imagePath) {
         console.log(`Updating image path for product ${product.name}:`);
         console.log(`  Old: ${product.imagePath}`);
-        console.log(`  New: ${newPath}`);
+        console.log(`  New: ${imagePath}`);
         
         await products.updateOne(
           { _id: product._id },
           { 
             $set: { 
-              imagePath: newPath,
-              image: newPath
+              imagePath: imagePath,
+              image: imagePath
             } 
           }
         );
       } else {
-        // If no matching image found, use a default image
-        const defaultPath = '/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png';
-        console.log(`No matching image found for product ${product.name}, using default image`);
-        
-        await products.updateOne(
-          { _id: product._id },
-          { 
-            $set: { 
-              imagePath: defaultPath,
-              image: defaultPath
-            } 
-          }
-        );
+        console.warn(`No image mapping found for product ${product.name}`);
       }
     }
 
