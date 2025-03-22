@@ -30,9 +30,7 @@ const getVimeoVideoId = (url) => {
 };
 
 export default function ProductDetail({ params }) {
-  // Use React.use() to unwrap the params
-  const { id } = React.use(params);
-  const productId = id;
+  const productId = params.id;
   const cart = useCart();
   const router = useRouter();
   
@@ -42,7 +40,6 @@ export default function ProductDetail({ params }) {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   
-  // Update useEffect to use productId instead of id
   useEffect(() => {
     async function fetchProduct() {
       try {
@@ -76,7 +73,7 @@ export default function ProductDetail({ params }) {
     }
     
     fetchProduct();
-  }, [productId]);  // Update dependency array to use productId
+  }, [productId]);
   
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
@@ -154,7 +151,7 @@ export default function ProductDetail({ params }) {
   }
   
   // Product display with real data
-  const productImage = product.imagePath || (product.images && product.images[0] ? product.images[0].url : '/images/placeholder.jpg');
+  const productImage = product.imagePath || '/images/placeholder.jpg';
   
   return (
     <Layout>
