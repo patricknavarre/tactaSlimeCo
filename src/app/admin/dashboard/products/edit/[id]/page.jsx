@@ -8,7 +8,8 @@ import ProductForm from '@/components/admin/ProductForm';
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
-  const id = params.id;  // Directly access id from params
+  const resolvedParams = React.use(params);  // Unwrap the params Promise
+  const id = resolvedParams.id;
   
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +83,15 @@ export default function EditProductPage({ params }) {
       // Add shopify ID only if it exists and isn't empty
       if (data.shopifyProductId && data.shopifyProductId.trim() !== '') {
         productData.shopifyProductId = data.shopifyProductId;
+      }
+
+      // Add video data if present
+      if (data.video && data.video.url) {
+        productData.video = {
+          url: data.video.url,
+          type: data.video.type || 'youtube',
+          title: data.video.title || ''
+        };
       }
       
       // Debug: Log data after processing

@@ -1,6 +1,28 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+// Helper function to extract YouTube video ID from URL
+const getYouTubeVideoId = (url) => {
+  if (!url) return '';
+  
+  // Handle YouTube Shorts URLs
+  if (url.includes('/shorts/')) {
+    const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+    return shortsMatch ? shortsMatch[1] : '';
+  }
+  
+  // Handle regular YouTube URLs
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+  return match ? match[1] : '';
+};
+
+// Helper function to extract Vimeo video ID from URL
+const getVimeoVideoId = (url) => {
+  if (!url) return '';
+  const match = url.match(/(?:vimeo\.com\/)(\d+)/);
+  return match ? match[1] : '';
+};
+
 const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const [previewImage, setPreviewImage] = useState(product?.imagePath || '');
   const [uploadError, setUploadError] = useState('');
@@ -87,6 +109,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const handleFormSubmit = async (data) => {
     // Ensure we have the image path
     console.log('Form data before submit:', data);
+    console.log('Video data:', data.video);
     
     if (!data.imagePath && previewImage) {
       console.error('Image path is missing but preview exists');
@@ -250,11 +273,11 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
               <select
                 id="video.type"
                 {...register('video.type')}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                className="input-field mt-1"
               >
                 <option value="youtube">YouTube</option>
                 <option value="vimeo">Vimeo</option>
-                <option value="other">Direct Video URL</option>
+                <option value="other">Other</option>
               </select>
             </div>
             
@@ -263,25 +286,14 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                 Video URL
               </label>
               <input
-                type="text"
                 id="video.url"
+                type="url"
                 {...register('video.url')}
-                placeholder={
-                  watchVideoType === 'youtube' 
-                    ? 'https://www.youtube.com/watch?v=...' 
-                    : watchVideoType === 'vimeo'
-                    ? 'https://vimeo.com/...'
-                    : 'https://example.com/video.mp4'
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                className="input-field mt-1"
+                placeholder={watchVideoType === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 
+                           watchVideoType === 'vimeo' ? 'https://vimeo.com/...' : 
+                           'Enter video URL'}
               />
-              <p className="mt-1 text-sm text-gray-500">
-                {watchVideoType === 'youtube' 
-                  ? 'Enter the full YouTube video URL or video ID'
-                  : watchVideoType === 'vimeo'
-                  ? 'Enter the full Vimeo video URL or video ID'
-                  : 'Enter the direct URL to your video file'}
-              </p>
             </div>
             
             <div>
@@ -289,14 +301,49 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                 Video Title
               </label>
               <input
-                type="text"
                 id="video.title"
+                type="text"
                 {...register('video.title')}
-                placeholder="Product Video"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                className="input-field mt-1"
+                placeholder="Enter a title for the video"
               />
             </div>
           </div>
+          
+          {/* Preview Section */}
+          {watch('video.url') && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Video Preview</h4>
+              <div className="relative pt-[56.25%] bg-gray-100 rounded-lg overflow-hidden">
+                {watchVideoType === 'youtube' && (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeVideoId(watch('video.url'))}`}
+                    title={watch('video.title') || 'Product Video'}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )}
+                {watchVideoType === 'vimeo' && (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${getVimeoVideoId(watch('video.url'))}`}
+                    title={watch('video.title') || 'Product Video'}
+                    className="absolute inset-0 w-full h-full"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                  />
+                )}
+                {watchVideoType === 'other' && (
+                  <video
+                    src={watch('video.url')}
+                    controls
+                    className="absolute inset-0 w-full h-full"
+                    title={watch('video.title') || 'Product Video'}
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Right column - Image */}

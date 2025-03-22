@@ -23,10 +23,12 @@ export async function POST(request) {
     });
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = file.name.replace(/\s+/g, '-').toLowerCase();
     
-    // Create a unique filename to prevent overwrites
-    const uniqueFilename = `${Date.now()}-${filename}`;
+    // Create a clean filename without spaces and special characters
+    const cleanFilename = file.name
+      .replace(/\s+/g, '-')           // Replace spaces with hyphens
+      .replace(/[^a-zA-Z0-9-_.]/g, '') // Remove special characters
+      .toLowerCase();                 // Convert to lowercase
     
     // Ensure the uploads directory exists
     const uploadDir = path.join(process.cwd(), 'public', 'images', 'products');
@@ -38,13 +40,13 @@ export async function POST(request) {
       }
     }
     
-    const filePath = path.join(uploadDir, uniqueFilename);
+    const filePath = path.join(uploadDir, cleanFilename);
     console.log('Upload API: Writing file to:', filePath);
     
     // Write the file
     await writeFile(filePath, buffer);
     
-    const imagePath = `/images/products/${uniqueFilename}`;
+    const imagePath = `/images/products/${cleanFilename}`;
     console.log('Upload API: File successfully saved. Returning path:', imagePath);
     
     // Return the path that can be stored in the database

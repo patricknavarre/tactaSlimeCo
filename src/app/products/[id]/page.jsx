@@ -7,9 +7,32 @@ import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+// Helper function to extract YouTube video ID from URL
+const getYouTubeVideoId = (url) => {
+  if (!url) return '';
+  
+  // Handle YouTube Shorts URLs
+  if (url.includes('/shorts/')) {
+    const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+    return shortsMatch ? shortsMatch[1] : '';
+  }
+  
+  // Handle regular YouTube URLs
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+  return match ? match[1] : '';
+};
+
+// Helper function to extract Vimeo video ID from URL
+const getVimeoVideoId = (url) => {
+  if (!url) return '';
+  const match = url.match(/(?:vimeo\.com\/)(\d+)/);
+  return match ? match[1] : '';
+};
+
 export default function ProductDetail({ params }) {
-  // Remove React.use() and use params.id directly
-  const productId = params.id;
+  // Use React.use() to unwrap the params
+  const { id } = React.use(params);
+  const productId = id;
   const cart = useCart();
   const router = useRouter();
   
@@ -38,6 +61,8 @@ export default function ProductDetail({ params }) {
         const data = await response.json();
         
         if (data.success && data.product) {
+          console.log('Product data:', data.product); // Debug log
+          console.log('Video data:', data.product.video); // Debug log
           setProduct(data.product);
         } else {
           setError(data.message || 'Failed to load product');
@@ -201,7 +226,7 @@ export default function ProductDetail({ params }) {
                 <div className="relative pt-[56.25%] bg-gray-100 rounded-lg overflow-hidden">
                   {product.video.type === 'youtube' ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.video.url)}`}
+                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.video.url)}?rel=0&modestbranding=1&playsinline=1&origin=${window.location.origin}`}
                       title={product.video.title || 'Product Video'}
                       className="absolute inset-0 w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -209,7 +234,7 @@ export default function ProductDetail({ params }) {
                     />
                   ) : product.video.type === 'vimeo' ? (
                     <iframe
-                      src={`https://player.vimeo.com/video/${getVimeoVideoId(product.video.url)}`}
+                      src={`https://player.vimeo.com/video/${getVimeoVideoId(product.video.url)}?rel=0`}
                       title={product.video.title || 'Product Video'}
                       className="absolute inset-0 w-full h-full"
                       allow="autoplay; fullscreen"
@@ -361,17 +386,4 @@ export default function ProductDetail({ params }) {
       </div>
     </Layout>
   );
-}
-
-// Add these helper functions at the top of the file, after the imports
-function getYouTubeVideoId(url) {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
-}
-
-function getVimeoVideoId(url) {
-  const regExp = /^.*(vimeo.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/;
-  const match = url.match(regExp);
-  return match ? match[5] : null;
 } 
