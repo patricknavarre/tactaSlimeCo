@@ -7,9 +7,8 @@ import Image from 'next/image';
 import ProductForm from '@/components/admin/ProductForm';
 
 export default function EditProductPage({ params }) {
-  // Get id from params using React.use()
   const router = useRouter();
-  const { id } = React.use(params);
+  const id = params.id;  // Directly access id from params
   
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
