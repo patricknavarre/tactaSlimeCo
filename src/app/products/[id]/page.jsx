@@ -8,8 +8,8 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 export default function ProductDetail({ params }) {
-  // Use React.use() to unwrap params
-  const productId = React.use(params).id;
+  // Remove React.use() and use params.id directly
+  const productId = params.id;
   const cart = useCart();
   const router = useRouter();
   
