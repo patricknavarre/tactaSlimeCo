@@ -8,8 +8,7 @@ import ProductForm from '@/components/admin/ProductForm';
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
-  const resolvedParams = React.use(params);  // Unwrap the params Promise
-  const id = resolvedParams.id;
+  const id = params?.id;
   
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
