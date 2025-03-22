@@ -25,6 +25,15 @@ const ProductSchema = new mongoose.Schema({
     url: String,
     alt: String
   }],
+  video: {
+    url: String,
+    type: {
+      type: String,
+      enum: ['youtube', 'vimeo', 'other'],
+      default: 'youtube'
+    },
+    title: String
+  },
   category: {
     type: String,
     required: [true, 'Please provide a product category']

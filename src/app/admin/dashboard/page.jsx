@@ -36,7 +36,7 @@ export default function AdminDashboard() {
         const customersData = await customersRes.json();
         
         // Calculate metrics
-        const totalProducts = productsData.products?.length || 0;
+        const totalProducts = Array.isArray(productsData) ? productsData.length : 0;
         
         // Calculate orders today
         const today = new Date();

@@ -193,6 +193,39 @@ export default function ProductDetail({ params }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
+            {/* Product Video */}
+            {product.video && product.video.url && (
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold mb-2">Product Video</h2>
+                <div className="relative pt-[56.25%] bg-gray-100 rounded-lg overflow-hidden">
+                  {product.video.type === 'youtube' ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.video.url)}`}
+                      title={product.video.title || 'Product Video'}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : product.video.type === 'vimeo' ? (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${getVimeoVideoId(product.video.url)}`}
+                      title={product.video.title || 'Product Video'}
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={product.video.url}
+                      controls
+                      className="absolute inset-0 w-full h-full"
+                      title={product.video.title || 'Product Video'}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+            
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
               <div className="flex items-center mb-4">
@@ -327,4 +360,17 @@ export default function ProductDetail({ params }) {
       </div>
     </Layout>
   );
+}
+
+// Add these helper functions at the top of the file, after the imports
+function getYouTubeVideoId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function getVimeoVideoId(url) {
+  const regExp = /^.*(vimeo.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/;
+  const match = url.match(regExp);
+  return match ? match[5] : null;
 } 

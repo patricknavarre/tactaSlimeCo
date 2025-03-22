@@ -17,12 +17,22 @@ export default function ContentManagement() {
       heroImagePath: '',
       featuredTitle: '',
       featuredSubtitle: '',
+      video: {
+        url: '',
+        type: 'youtube',
+        title: ''
+      }
     },
     about: {
       heading: '',
       story: '',
       missionTitle: '',
       missionText: '',
+      video: {
+        url: '',
+        type: 'youtube',
+        title: ''
+      }
     }
   });
 
@@ -40,8 +50,36 @@ export default function ContentManagement() {
       console.log('Content API Response:', data);
       
       if (data.success && data.content) {
-        console.log('Setting content:', data.content);
-        setContent(data.content);
+        // Ensure all values are strings
+        const sanitizedContent = {
+          home: {
+            heroTitle: data.content.home?.heroTitle || '',
+            heroSubtitle: data.content.home?.heroSubtitle || '',
+            heroButtonText: data.content.home?.heroButtonText || '',
+            heroImagePath: data.content.home?.heroImagePath || '',
+            featuredTitle: data.content.home?.featuredTitle || '',
+            featuredSubtitle: data.content.home?.featuredSubtitle || '',
+            video: data.content.home?.video || {
+              url: '',
+              type: 'youtube',
+              title: ''
+            }
+          },
+          about: {
+            heading: data.content.about?.heading || '',
+            story: data.content.about?.story || '',
+            missionTitle: data.content.about?.missionTitle || '',
+            missionText: data.content.about?.missionText || '',
+            video: data.content.about?.video || {
+              url: '',
+              type: 'youtube',
+              title: ''
+            }
+          }
+        };
+        
+        console.log('Setting content:', sanitizedContent);
+        setContent(sanitizedContent);
         setError(''); // Clear any existing error
       } else {
         console.error('API Error Response:', data);
@@ -280,6 +318,78 @@ export default function ContentManagement() {
                   
                   <hr className="my-6 border-gray-200" />
                   
+                  <h3 className="text-lg font-medium text-gray-900">Hero Video</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="homeVideoType" className="block text-sm font-medium text-gray-700">
+                        Video Type
+                      </label>
+                      <select
+                        id="homeVideoType"
+                        value={content.home.video.type}
+                        onChange={(e) => handleContentChange('home', 'video', {
+                          ...content.home.video,
+                          type: e.target.value
+                        })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      >
+                        <option value="youtube">YouTube</option>
+                        <option value="vimeo">Vimeo</option>
+                        <option value="other">Direct Video URL</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="homeVideoUrl" className="block text-sm font-medium text-gray-700">
+                        Video URL
+                      </label>
+                      <input
+                        type="text"
+                        id="homeVideoUrl"
+                        value={content.home.video.url}
+                        onChange={(e) => handleContentChange('home', 'video', {
+                          ...content.home.video,
+                          url: e.target.value
+                        })}
+                        placeholder={
+                          content.home.video.type === 'youtube' 
+                            ? 'https://www.youtube.com/watch?v=...' 
+                            : content.home.video.type === 'vimeo'
+                            ? 'https://vimeo.com/...'
+                            : 'https://example.com/video.mp4'
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      />
+                      <p className="mt-1 text-sm text-gray-500">
+                        {content.home.video.type === 'youtube' 
+                          ? 'Enter the full YouTube video URL or video ID'
+                          : content.home.video.type === 'vimeo'
+                          ? 'Enter the full Vimeo video URL or video ID'
+                          : 'Enter the direct URL to your video file'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="homeVideoTitle" className="block text-sm font-medium text-gray-700">
+                        Video Title
+                      </label>
+                      <input
+                        type="text"
+                        id="homeVideoTitle"
+                        value={content.home.video.title}
+                        onChange={(e) => handleContentChange('home', 'video', {
+                          ...content.home.video,
+                          title: e.target.value
+                        })}
+                        placeholder="Hero Video"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      />
+                    </div>
+                  </div>
+                  
+                  <hr className="my-6 border-gray-200" />
+                  
                   <h3 className="text-lg font-medium text-gray-900">Featured Products Section</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,6 +477,78 @@ export default function ContentManagement() {
                       onChange={(e) => handleContentChange('about', 'missionText', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
                     />
+                  </div>
+
+                  <hr className="my-6 border-gray-200" />
+                  
+                  <h3 className="text-lg font-medium text-gray-900">About Video</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="aboutVideoType" className="block text-sm font-medium text-gray-700">
+                        Video Type
+                      </label>
+                      <select
+                        id="aboutVideoType"
+                        value={content.about.video.type}
+                        onChange={(e) => handleContentChange('about', 'video', {
+                          ...content.about.video,
+                          type: e.target.value
+                        })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      >
+                        <option value="youtube">YouTube</option>
+                        <option value="vimeo">Vimeo</option>
+                        <option value="other">Direct Video URL</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="aboutVideoUrl" className="block text-sm font-medium text-gray-700">
+                        Video URL
+                      </label>
+                      <input
+                        type="text"
+                        id="aboutVideoUrl"
+                        value={content.about.video.url}
+                        onChange={(e) => handleContentChange('about', 'video', {
+                          ...content.about.video,
+                          url: e.target.value
+                        })}
+                        placeholder={
+                          content.about.video.type === 'youtube' 
+                            ? 'https://www.youtube.com/watch?v=...' 
+                            : content.about.video.type === 'vimeo'
+                            ? 'https://vimeo.com/...'
+                            : 'https://example.com/video.mp4'
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      />
+                      <p className="mt-1 text-sm text-gray-500">
+                        {content.about.video.type === 'youtube' 
+                          ? 'Enter the full YouTube video URL or video ID'
+                          : content.about.video.type === 'vimeo'
+                          ? 'Enter the full Vimeo video URL or video ID'
+                          : 'Enter the direct URL to your video file'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="aboutVideoTitle" className="block text-sm font-medium text-gray-700">
+                        Video Title
+                      </label>
+                      <input
+                        type="text"
+                        id="aboutVideoTitle"
+                        value={content.about.video.title}
+                        onChange={(e) => handleContentChange('about', 'video', {
+                          ...content.about.video,
+                          title: e.target.value
+                        })}
+                        placeholder="About Video"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

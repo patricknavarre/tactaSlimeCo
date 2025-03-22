@@ -20,12 +20,18 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
       inventory: product?.inventory || 0,
       category: product?.category || '',
       featured: product?.featured || false,
-      imagePath: product?.imagePath || ''
+      imagePath: product?.imagePath || '',
+      video: {
+        url: product?.video?.url || '',
+        type: product?.video?.type || 'youtube',
+        title: product?.video?.title || ''
+      }
     }
   });
   
   const watchPrice = watch('price');
   const watchName = watch('name');
+  const watchVideoType = watch('video.type');
   
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -231,6 +237,65 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
             <p className="mt-1 text-xs text-gray-500">
               Enter product specifications in JSON format (optional)
             </p>
+          </div>
+          
+          {/* Video Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Product Video</h3>
+            
+            <div>
+              <label htmlFor="video.type" className="block text-sm font-medium text-gray-700">
+                Video Type
+              </label>
+              <select
+                id="video.type"
+                {...register('video.type')}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+              >
+                <option value="youtube">YouTube</option>
+                <option value="vimeo">Vimeo</option>
+                <option value="other">Direct Video URL</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="video.url" className="block text-sm font-medium text-gray-700">
+                Video URL
+              </label>
+              <input
+                type="text"
+                id="video.url"
+                {...register('video.url')}
+                placeholder={
+                  watchVideoType === 'youtube' 
+                    ? 'https://www.youtube.com/watch?v=...' 
+                    : watchVideoType === 'vimeo'
+                    ? 'https://vimeo.com/...'
+                    : 'https://example.com/video.mp4'
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {watchVideoType === 'youtube' 
+                  ? 'Enter the full YouTube video URL or video ID'
+                  : watchVideoType === 'vimeo'
+                  ? 'Enter the full Vimeo video URL or video ID'
+                  : 'Enter the direct URL to your video file'}
+              </p>
+            </div>
+            
+            <div>
+              <label htmlFor="video.title" className="block text-sm font-medium text-gray-700">
+                Video Title
+              </label>
+              <input
+                type="text"
+                id="video.title"
+                {...register('video.title')}
+                placeholder="Product Video"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tacta-pink focus:ring-tacta-pink"
+              />
+            </div>
           </div>
         </div>
         
