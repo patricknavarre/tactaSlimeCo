@@ -35,11 +35,15 @@ export default function Home() {
         }
         
         const data = await response.json();
-        console.log('All products data:', data); // Debug log
+        console.log('API Response - All products:', data);
         
         // Filter for featured products only
-        const featured = Array.isArray(data) ? data.filter(product => product.featured) : [];
-        console.log('Featured products:', featured); // Debug log
+        const featured = Array.isArray(data) ? data.filter(product => {
+          console.log('Product:', product.name, 'Featured:', product.featured, 'ImagePath:', product.imagePath);
+          return product.featured;
+        }) : [];
+        
+        console.log('Filtered featured products:', featured);
         setFeaturedProducts(featured);
       } catch (error) {
         console.error('Error fetching featured products:', error);
@@ -87,31 +91,20 @@ export default function Home() {
 
   // Function to handle adding a product to cart
   const handleQuickAdd = (product) => {
-    if (!cart || !cart.addToCart) {
-      console.error("Cart context is not available or missing addToCart function");
-      return;
-    }
-
-    setQuickAddProduct(product);
+    if (product.inventory <= 0) return;
     
-    // Create a complete product object with the correct property names
-    const productToAdd = {
-      id: product._id,
+    // Add to cart
+    cart.addToCart({
+      _id: product._id,
       name: product.name,
       price: product.price,
-      image: product.imagePath,
-      description: product.description,
-      quantity: 1
-    };
+      quantity: 1,
+      imagePath: product.imagePath
+    });
     
-    // Add to cart with explicit logging
-    console.log("Adding to cart from homepage:", productToAdd);
-    cart.addToCart(productToAdd, 1);
-    
-    // Reset animation after a delay
-    setTimeout(() => {
-      setQuickAddProduct(null);
-    }, 1500);
+    // Show success message
+    setQuickAddProduct(product);
+    setTimeout(() => setQuickAddProduct(null), 2000);
   };
 
   // Animation variants for staggered children
@@ -236,32 +229,35 @@ export default function Home() {
                 variants={itemVariants}
                 className="group relative"
               >
-                <Link href={`/products/${product._id}`}>
-                  <div className="card bg-white rounded-2xl border-2 border-gray-100 hover:border-tacta-pink overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="bg-gradient-to-r from-tacta-pink to-tacta-peach text-white text-sm px-4 py-1 rounded-full uppercase tracking-wider font-semibold shadow-lg">
-                        Featured
-                      </span>
-                    </div>
+                <div className="card bg-white rounded-2xl border-2 border-gray-100 hover:border-tacta-pink overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="bg-gradient-to-r from-tacta-pink to-tacta-peach text-white text-sm px-4 py-1 rounded-full uppercase tracking-wider font-semibold shadow-lg">
+                      Featured
+                    </span>
+                  </div>
+                  
+                  {/* Make the entire card clickable except the Add to Cart button */}
+                  <Link href={`/products/${product._id}`} className="block">
                     <div className="relative h-72 bg-gradient-to-br from-tacta-cream to-white overflow-hidden">
-                      {product.imagePath ? (
+                      {product.imagePath && (
                         <Image
                           src={product.imagePath}
                           alt={product.name}
                           fill
                           className="object-cover transform group-hover:scale-110 transition-transform duration-500"
-                          onLoadingComplete={(result) => {
-                            console.log('Image loaded:', product.imagePath);
-                          }}
                           onError={() => {
                             console.error('Image failed to load:', product.imagePath);
                           }}
                         />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-lg text-gray-500">No image available</span>
-                        </div>
                       )}
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-tacta-pink/10 to-tacta-peach/10">
+                        <div className="text-center p-4">
+                          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-tacta-pink/20 flex items-center justify-center">
+                            <span className="text-3xl">✨</span>
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-800">{product.name}</h3>
+                        </div>
+                      </div>
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-3 group-hover:text-tacta-pink transition-colors">
@@ -270,23 +266,26 @@ export default function Home() {
                       <p className="text-gray-600 mb-4">{product.description}</p>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-tacta-pink">${product.price.toFixed(2)}</span>
-                        <motion.button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleQuickAdd(product);
-                          }}
-                          className="btn-primary cartoon-btn px-6 py-3 font-bold text-white"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          disabled={product.inventory <= 0}
-                        >
-                          {product.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
-                        </motion.button>
                       </div>
                     </div>
+                  </Link>
+                  
+                  {/* Add to Cart button outside of the Link */}
+                  <div className="px-6 pb-6">
+                    <motion.button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleQuickAdd(product);
+                      }}
+                      className="btn-primary cartoon-btn px-6 py-3 font-bold text-white w-full"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={product.inventory <= 0}
+                    >
+                      {product.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
+                    </motion.button>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>

@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 export default function ProductDetail({ params }) {
-  const { id } = params;
+  // Use React.use() to unwrap params
+  const productId = React.use(params).id;
   const cart = useCart();
   const router = useRouter();
   
@@ -18,12 +19,12 @@ export default function ProductDetail({ params }) {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   
-  // Fetch product data
+  // Update useEffect to use productId instead of id
   useEffect(() => {
     async function fetchProduct() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/products/${id}`);
+        const response = await fetch(`/api/products/${productId}`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -50,7 +51,7 @@ export default function ProductDetail({ params }) {
     }
     
     fetchProduct();
-  }, [id]);
+  }, [productId]);  // Update dependency array to use productId
   
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
