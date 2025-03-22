@@ -24,17 +24,25 @@ export async function POST(request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Create a clean filename without spaces and special characters
-    const cleanFilename = file.name
+    // Add timestamp to filename to make it unique
+    const timestamp = Date.now();
+    const cleanFilename = `${timestamp}-${file.name
       .replace(/\s+/g, '-')           // Replace spaces with hyphens
       .replace(/[^a-zA-Z0-9-_.]/g, '') // Remove special characters
-      .toLowerCase();                 // Convert to lowercase
+      .toLowerCase()}`;                 // Convert to lowercase
     
-    // Ensure the uploads directory exists
-    const uploadDir = path.join(process.cwd(), 'public', 'images', 'products');
+    // Get the absolute path to the public directory
+    const publicDir = path.join(process.cwd(), 'public');
+    const uploadDir = path.join(publicDir, 'images', 'products');
+    
+    console.log('Upload API: Public directory:', publicDir);
+    console.log('Upload API: Upload directory:', uploadDir);
+    
     try {
       await mkdir(uploadDir, { recursive: true });
+      console.log('Upload API: Directory created/verified');
     } catch (err) {
+      console.error('Upload API: Error creating directory:', err);
       if (err.code !== 'EEXIST') {
         throw err;
       }
@@ -45,6 +53,7 @@ export async function POST(request) {
     
     // Write the file
     await writeFile(filePath, buffer);
+    console.log('Upload API: File written successfully');
     
     const imagePath = `/images/products/${cleanFilename}`;
     console.log('Upload API: File successfully saved. Returning path:', imagePath);
@@ -57,6 +66,7 @@ export async function POST(request) {
     
   } catch (error) {
     console.error('Upload API Error:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
       { error: 'Error uploading file', details: error.message },
       { status: 500 }
