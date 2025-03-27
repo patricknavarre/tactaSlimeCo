@@ -99,7 +99,12 @@ export async function PATCH(request, { params }) {
     if (updateData.description !== undefined) safeUpdate.description = updateData.description;
     if (updateData.category !== undefined) safeUpdate.category = updateData.category;
     if (updateData.featured !== undefined) safeUpdate.featured = !!updateData.featured;
-    if (updateData.imagePath !== undefined) safeUpdate.imagePath = updateData.imagePath;
+    
+    // Handle image fields - sync both imagePath and image
+    if (updateData.imagePath !== undefined) {
+      safeUpdate.imagePath = updateData.imagePath;
+      safeUpdate.image = updateData.imagePath; // Keep both fields in sync
+    }
     
     // Handle numeric fields carefully
     if (updateData.inventory !== undefined) {

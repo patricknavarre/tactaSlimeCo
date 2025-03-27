@@ -16,7 +16,7 @@ export async function GET() {
       // If we have fallback data, return it
       if (fallbackData && fallbackData.products) {
         console.log('API: Returning fallback products data');
-        return NextResponse.json(fallbackData.products);
+        return NextResponse.json({ products: fallbackData.products });
       }
       
       return NextResponse.json(
@@ -32,18 +32,20 @@ export async function GET() {
     // If no products found, provide fallback for testing
     if (!products || products.length === 0) {
       console.log('API: No products found in database, returning demo product');
-      return NextResponse.json([{
-        _id: 'demo1',
-        name: 'Demo Slime Product',
-        description: 'This is a demo product when no products are in the database',
-        price: 9.99,
-        inventory: 10,
-        imagePath: '/images/products/default-slime.jpg'
-      }]);
+      return NextResponse.json({
+        products: [{
+          _id: 'demo1',
+          name: 'Demo Slime Product',
+          description: 'This is a demo product when no products are in the database',
+          price: 9.99,
+          inventory: 10,
+          imagePath: '/images/products/default-slime.jpg'
+        }]
+      });
     }
     
-    // Return the products as JSON
-    return NextResponse.json(products);
+    // Return the products as JSON with the expected format
+    return NextResponse.json({ products: products });
   } catch (error) {
     console.error('API: Error in /api/products:', error.message);
     // Ensure we return a proper JSON response even in error cases
@@ -71,6 +73,14 @@ export async function POST(request) {
     
     const body = await request.json();
     console.log('API: Product data received:', body);
+    
+    // Ensure both image fields are set
+    if (body.imagePath) {
+      body.image = body.imagePath; // Keep both fields in sync
+    } else {
+      body.imagePath = '/images/products/default.jpg';
+      body.image = '/images/products/default.jpg';
+    }
     
     const result = await db.collection('products').insertOne(body);
     console.log('API: Product created with ID:', result.insertedId);

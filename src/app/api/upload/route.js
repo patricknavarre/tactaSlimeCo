@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { put } from '@vercel/blob';
+import * as blob from '@vercel/blob';
 
 export async function POST(request) {
   try {
@@ -30,29 +30,30 @@ export async function POST(request) {
       .replace(/[^a-zA-Z0-9-_.]/g, '') // Remove special characters
       .toLowerCase()}`;                 // Convert to lowercase
 
-    // Try Vercel Blob storage first
-    try {
-      const token = process.env.BLOB_READ_WRITE_TOKEN;
-      if (token) {
-        console.log('Upload API: Attempting to use Vercel Blob storage');
-        const { url } = await put(cleanFilename, file, {
+    // Check if we're in Vercel environment
+    const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+    
+    // Try Vercel Blob storage if we're in Vercel environment
+    if (isVercel) {
+      try {
+        console.log('Upload API: Using Vercel Blob storage');
+        const { url } = await blob.put(cleanFilename, file, {
           access: 'public',
-          addRandomSuffix: false,
-          token: token
+          addRandomSuffix: false
         });
         console.log('Upload API: File uploaded to Blob Storage:', url);
         return NextResponse.json({ 
           success: true,
           imagePath: url
         });
+      } catch (blobError) {
+        console.error('Upload API: Blob storage error:', blobError);
+        throw new Error(`Blob storage error: ${blobError.message}`);
       }
-    } catch (blobError) {
-      console.error('Upload API: Blob storage error:', blobError);
-      // Continue to filesystem fallback
     }
 
-    // Fallback to filesystem storage
-    console.log('Upload API: Falling back to filesystem storage');
+    // Use filesystem storage for local development
+    console.log('Upload API: Using filesystem storage');
     const buffer = Buffer.from(await file.arrayBuffer());
     const publicDir = path.join(process.cwd(), 'public');
     const uploadDir = path.join(publicDir, 'images', 'products');
@@ -78,6 +79,7 @@ export async function POST(request) {
     console.error('Environment:', {
       nodeEnv: process.env.NODE_ENV,
       vercelEnv: process.env.VERCEL_ENV,
+      isVercel: process.env.VERCEL || process.env.VERCEL_ENV,
       hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
     });
     
