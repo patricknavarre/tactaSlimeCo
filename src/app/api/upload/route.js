@@ -30,13 +30,19 @@ export async function POST(request) {
       .replace(/[^a-zA-Z0-9-_.]/g, '') // Remove special characters
       .toLowerCase()}`;                 // Convert to lowercase
 
-    // Check if we're in Vercel environment
-    const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-    
-    // Try Vercel Blob storage if we're in Vercel environment
-    if (isVercel) {
+    // Log environment information
+    const envInfo = {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      IS_VERCEL: process.env.VERCEL,
+      BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN
+    };
+    console.log('Upload API: Environment Info:', envInfo);
+
+    // Always try Vercel Blob storage first in production
+    if (process.env.NODE_ENV === 'production') {
       try {
-        console.log('Upload API: Using Vercel Blob storage');
+        console.log('Upload API: Using Vercel Blob storage (production environment)');
         const { url } = await blob.put(cleanFilename, file, {
           access: 'public',
           addRandomSuffix: false
@@ -52,26 +58,31 @@ export async function POST(request) {
       }
     }
 
-    // Use filesystem storage for local development
-    console.log('Upload API: Using filesystem storage');
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const publicDir = path.join(process.cwd(), 'public');
-    const uploadDir = path.join(publicDir, 'images', 'products');
-    
-    console.log('Upload API: Creating upload directory:', uploadDir);
-    await mkdir(uploadDir, { recursive: true });
-    
-    const filePath = path.join(uploadDir, cleanFilename);
-    console.log('Upload API: Writing file to:', filePath);
-    
-    await writeFile(filePath, buffer);
-    const imagePath = `/images/products/${cleanFilename}`;
-    console.log('Upload API: File saved to filesystem:', imagePath);
-    
-    return NextResponse.json({ 
-      success: true,
-      imagePath: imagePath
-    });
+    // Only use filesystem storage in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Upload API: Using filesystem storage (development environment)');
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const publicDir = path.join(process.cwd(), 'public');
+      const uploadDir = path.join(publicDir, 'images', 'products');
+      
+      console.log('Upload API: Creating upload directory:', uploadDir);
+      await mkdir(uploadDir, { recursive: true });
+      
+      const filePath = path.join(uploadDir, cleanFilename);
+      console.log('Upload API: Writing file to:', filePath);
+      
+      await writeFile(filePath, buffer);
+      const imagePath = `/images/products/${cleanFilename}`;
+      console.log('Upload API: File saved to filesystem:', imagePath);
+      
+      return NextResponse.json({ 
+        success: true,
+        imagePath: imagePath
+      });
+    }
+
+    // If we get here, something is wrong with the environment
+    throw new Error(`Invalid environment: ${process.env.NODE_ENV}. Expected 'development' or 'production'`);
     
   } catch (error) {
     console.error('Upload API Error:', error);
@@ -79,7 +90,7 @@ export async function POST(request) {
     console.error('Environment:', {
       nodeEnv: process.env.NODE_ENV,
       vercelEnv: process.env.VERCEL_ENV,
-      isVercel: process.env.VERCEL || process.env.VERCEL_ENV,
+      isVercel: process.env.VERCEL,
       hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
     });
     
@@ -87,7 +98,13 @@ export async function POST(request) {
       { 
         error: 'Error uploading file', 
         details: error.message,
-        env: process.env.NODE_ENV 
+        env: process.env.NODE_ENV,
+        envInfo: {
+          nodeEnv: process.env.NODE_ENV,
+          vercelEnv: process.env.VERCEL_ENV,
+          isVercel: process.env.VERCEL,
+          hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
+        }
       },
       { status: 500 }
     );
