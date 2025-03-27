@@ -4,29 +4,37 @@ import path from 'path';
 import * as blob from '@vercel/blob';
 
 export async function POST(request) {
+  const envInfo = {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    IS_VERCEL: process.env.VERCEL,
+    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN,
+    VERCEL_URL: process.env.VERCEL_URL,
+    VERCEL_REGION: process.env.VERCEL_REGION
+  };
+
   try {
-    console.log('Upload API: Processing file upload request');
+    console.log('Upload API: Starting with environment:', envInfo);
+    
     const formData = await request.formData();
     const file = formData.get('file');
 
     if (!file) {
       console.error('Upload API: No file provided in request');
       return NextResponse.json(
-        { error: 'No file uploaded' },
+        { 
+          error: 'No file uploaded',
+          envInfo 
+        },
         { status: 400 }
       );
     }
 
-    // Log detailed environment information
-    const envInfo = {
-      NODE_ENV: process.env.NODE_ENV,
-      VERCEL_ENV: process.env.VERCEL_ENV,
-      IS_VERCEL: process.env.VERCEL,
-      BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN,
-      VERCEL_URL: process.env.VERCEL_URL,
-      VERCEL_REGION: process.env.VERCEL_REGION
-    };
-    console.log('Upload API: Environment Info:', envInfo);
+    console.log('Upload API: File received:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
 
     // Create a unique filename
     const timestamp = Date.now();
@@ -37,10 +45,10 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Force blob storage if we're in Vercel (either production or preview)
+    // Always try to use blob storage in Vercel environment
     if (process.env.VERCEL || process.env.VERCEL_ENV) {
       try {
-        console.log('Upload API: Using Vercel Blob storage (Vercel environment detected)');
+        console.log('Upload API: Attempting Vercel Blob storage upload');
         const { url } = await blob.put(cleanFilename, file, {
           access: 'public',
           addRandomSuffix: false
@@ -49,20 +57,26 @@ export async function POST(request) {
         return NextResponse.json({ 
           success: true,
           imagePath: url,
-          environment: 'vercel'
+          environment: 'vercel',
+          envInfo
         });
       } catch (blobError) {
-        console.error('Upload API: Blob storage error:', blobError);
-        console.error('Upload API: Blob error details:', {
+        console.error('Upload API: Blob storage error:', {
           message: blobError.message,
           stack: blobError.stack,
           code: blobError.code
         });
-        throw new Error(`Blob storage error: ${blobError.message}`);
+        return NextResponse.json({ 
+          error: 'Blob storage error',
+          details: blobError.message,
+          envInfo,
+          stack: blobError.stack,
+          code: blobError.code
+        }, { status: 500 });
       }
     }
 
-    // Only reach here for local development
+    // Local development: Use filesystem
     console.log('Upload API: Using filesystem storage (local development)');
     const buffer = Buffer.from(await file.arrayBuffer());
     const publicDir = path.join(process.cwd(), 'public');
@@ -81,34 +95,23 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: true,
       imagePath: imagePath,
-      environment: 'local'
+      environment: 'local',
+      envInfo
     });
     
   } catch (error) {
-    console.error('Upload API Error:', error);
-    console.error('Error stack:', error.stack);
-    console.error('Environment:', {
-      nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
-      isVercel: process.env.VERCEL,
-      hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
-      vercelUrl: process.env.VERCEL_URL,
-      vercelRegion: process.env.VERCEL_REGION
+    console.error('Upload API Error:', {
+      message: error.message,
+      stack: error.stack,
+      envInfo
     });
     
     return NextResponse.json(
       { 
         error: 'Error uploading file', 
         details: error.message,
-        env: process.env.NODE_ENV,
-        envInfo: {
-          nodeEnv: process.env.NODE_ENV,
-          vercelEnv: process.env.VERCEL_ENV,
-          isVercel: process.env.VERCEL,
-          hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
-          vercelUrl: process.env.VERCEL_URL,
-          vercelRegion: process.env.VERCEL_REGION
-        }
+        stack: error.stack,
+        envInfo
       },
       { status: 500 }
     );
