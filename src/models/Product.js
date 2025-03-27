@@ -21,10 +21,20 @@ const ProductSchema = new mongoose.Schema({
     min: [0, 'Inventory must be a non-negative number'],
     default: 0
   },
-  images: [{
-    url: String,
-    alt: String
-  }],
+  imagePath: {
+    type: String,
+    get: function(v) {
+      // If the path starts with http or https, it's a Vercel Blob URL
+      if (v && (v.startsWith('http://') || v.startsWith('https://'))) {
+        return v;
+      }
+      // If it's a relative path, convert it to a Vercel Blob URL
+      if (v && v.startsWith('/images/products/')) {
+        return `${process.env.NEXT_PUBLIC_BACKEND_URL}${v}`;
+      }
+      return v;
+    }
+  },
   category: {
     type: String,
     required: [true, 'Please provide a product category']
@@ -49,6 +59,9 @@ const ProductSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  toJSON: { getters: true }, // Enable getters when converting to JSON
+  toObject: { getters: true } // Enable getters when converting to object
 });
 
 // Update the updatedAt timestamp before saving

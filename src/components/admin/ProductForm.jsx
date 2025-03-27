@@ -65,9 +65,9 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
         throw new Error('Invalid response from server');
       }
 
-      console.log('Setting imagePath:', data.imagePath);
-      // Set the imagePath in the form
+      // Set the imagePath in the form - this will be a Vercel Blob URL
       setValue('imagePath', data.imagePath);
+      setPreviewImage(data.imagePath);
       
     } catch (error) {
       console.error('Upload error:', error);

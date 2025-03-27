@@ -2,7 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'tactaslime.com', 'tactaslimeco.vercel.app'],
+    domains: [
+      'images.unsplash.com',
+      'public.blob.vercel-storage.com'
+    ],
     unoptimized: true,
   },
   async headers() {
