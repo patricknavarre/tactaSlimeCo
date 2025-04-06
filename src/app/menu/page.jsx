@@ -111,9 +111,6 @@ export default function MenuPage() {
                         <p className="text-gray-600 mb-4 text-sm">
                           {product.description}
                         </p>
-                        <div className="text-2xl font-bold text-tacta-pink">
-                          ${product.price.toFixed(2)}
-                        </div>
                       </div>
                     </motion.div>
                   ))}
