@@ -144,12 +144,22 @@ export async function POST(request) {
         heroImagePath: heroImagePath || formData.get('heroImagePath') || '',
         featuredTitle: formData.get('featuredTitle'),
         featuredSubtitle: formData.get('featuredSubtitle'),
+        video: {
+          url: formData.get('homeVideoUrl') || '',
+          type: formData.get('homeVideoType') || 'youtube',
+          title: formData.get('homeVideoTitle') || ''
+        }
       },
       about: {
         heading: formData.get('aboutHeading'),
         story: formData.get('aboutStory'),
         missionTitle: formData.get('missionTitle'),
         missionText: formData.get('missionText'),
+        video: {
+          url: formData.get('aboutVideoUrl') || '',
+          type: formData.get('aboutVideoType') || 'youtube',
+          title: formData.get('aboutVideoTitle') || ''
+        }
       },
       updatedAt: new Date()
     };
@@ -160,6 +170,14 @@ export async function POST(request) {
       // Preserve existing hero image path if no new image is uploaded
       if (!heroImagePath && existingContent.home?.heroImagePath) {
         content.home.heroImagePath = existingContent.home.heroImagePath;
+      }
+      
+      // Preserve existing video data if not provided in the form
+      if (!formData.get('homeVideoUrl') && existingContent.home?.video) {
+        content.home.video = existingContent.home.video;
+      }
+      if (!formData.get('aboutVideoUrl') && existingContent.about?.video) {
+        content.about.video = existingContent.about.video;
       }
     }
     

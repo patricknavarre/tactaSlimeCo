@@ -4,58 +4,82 @@ import clientPromise, { connectToDatabase } from '@/lib/mongodb';
 // Sample product data
 const productsData = [
   {
-    name: "Bubblegum Cloud Slime",
-    description: "A fluffy cloud slime with bubblegum scent that feels like you're touching a cloud!",
+    name: "Ice Cream Party Slime",
+    description: "A delightful slime that looks and feels like ice cream!",
     price: 14.99,
     inventory: 42,
     category: "Cloud Slime",
     featured: true,
-    imagePath: "/images/products/cloud-slime-bubblegum.jpg"
+    imagePath: "/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png",
+    images: [{
+      url: "/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png",
+      alt: "Ice Cream Party Slime"
+    }]
   },
   {
-    name: "Butter Slime - Strawberry",
-    description: "Soft and spreadable butter slime with a delightful strawberry scent.",
+    name: "Game Over Slime",
+    description: "A fun gaming-themed slime with amazing texture!",
     price: 12.99,
     inventory: 28,
     category: "Butter Slime",
     featured: true,
-    imagePath: "/images/products/butter-slime-strawberry.jpg"
+    imagePath: "/images/products/1742428398750-oops_gameover_tactaslime_img_3234.png",
+    images: [{
+      url: "/images/products/1742428398750-oops_gameover_tactaslime_img_3234.png",
+      alt: "Game Over Slime"
+    }]
   },
   {
-    name: "Glitter Galaxy Slime",
-    description: "Sparkly slime filled with glitter that resembles a galaxy of stars.",
+    name: "Ice Cream Party Slime - Classic",
+    description: "The classic version of our popular Ice Cream Party Slime!",
     price: 15.99,
     inventory: 16,
-    category: "Glitter Slime",
+    category: "Cloud Slime",
     featured: true,
-    imagePath: "/images/products/glitter-galaxy-slime.jpg"
+    imagePath: "/images/products/1742427971497-icecreamparty_tactaslime_img_3220.png",
+    images: [{
+      url: "/images/products/1742427971497-icecreamparty_tactaslime_img_3220.png",
+      alt: "Ice Cream Party Slime - Classic"
+    }]
   },
   {
-    name: "Crunchy Rainbow Slime",
-    description: "Multi-colored slime with crunchy beads for a satisfying texture.",
-    price: 13.99,
+    name: "Game Over Slime - Limited Edition",
+    description: "A special edition of our popular gaming-themed slime!",
+    price: 15.99,
+    inventory: 16,
+    category: "Butter Slime",
+    featured: true,
+    imagePath: "/images/products/1742428232814-oops_gameover_tactaslime_img_3234.png",
+    images: [{
+      url: "/images/products/1742428232814-oops_gameover_tactaslime_img_3234.png",
+      alt: "Game Over Slime - Limited Edition"
+    }]
+  },
+  {
+    name: "Ice Cream Party Slime - Party Pack",
+    description: "Perfect for parties! A larger size of our Ice Cream Party Slime.",
+    price: 19.99,
     inventory: 34,
-    category: "Crunchy Slime",
+    category: "Cloud Slime",
     featured: false,
-    imagePath: "/images/products/crunchy-rainbow-slime.jpg"
+    imagePath: "/images/products/1742427916349-icecreamparty_tactaslime_img_3220.png",
+    images: [{
+      url: "/images/products/1742427916349-icecreamparty_tactaslime_img_3220.png",
+      alt: "Ice Cream Party Slime - Party Pack"
+    }]
   },
   {
-    name: "Clear Slime - Ocean Breeze",
-    description: "Crystal clear slime with a refreshing ocean breeze scent.",
-    price: 11.99,
+    name: "Game Over Slime - Collector's Edition",
+    description: "A special collector's edition of our gaming-themed slime.",
+    price: 18.99,
     inventory: 22,
-    category: "Clear Slime",
+    category: "Butter Slime",
     featured: false,
-    imagePath: "/images/products/clear-slime-ocean.jpg"
-  },
-  {
-    name: "Foam Slime - Cotton Candy",
-    description: "Fluffy foam slime with sweet cotton candy fragrance.",
-    price: 12.99,
-    inventory: 19,
-    category: "Foam Slime",
-    featured: false,
-    imagePath: "/images/products/foam-slime-cotton-candy.jpg"
+    imagePath: "/images/products/1742428173172-oops_gameover_tactaslime_img_3234.png",
+    images: [{
+      url: "/images/products/1742428173172-oops_gameover_tactaslime_img_3234.png",
+      alt: "Game Over Slime - Collector's Edition"
+    }]
   }
 ];
 

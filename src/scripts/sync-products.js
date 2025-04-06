@@ -23,30 +23,30 @@ const productsData = [
   },
   {
     name: "Glitter Galaxy Slime",
-    description: "Sparkly slime filled with glitter that resembles a galaxy of stars.",
-    price: 15.99,
-    inventory: 16,
+    description: "A mesmerizing slime filled with sparkly glitter that shimmers like the night sky.",
+    price: 12.99,
+    inventory: 50,
     category: "Glitter Slime",
     featured: true,
-    imagePath: "/images/products/glitter-galaxy-slime.jpg"
+    imagePath: "/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png"
   },
   {
     name: "Crunchy Rainbow Slime",
-    description: "Multi-colored slime with crunchy beads for a satisfying texture.",
-    price: 13.99,
-    inventory: 34,
+    description: "A satisfyingly crunchy slime with rainbow-colored beads.",
+    price: 14.99,
+    inventory: 30,
     category: "Crunchy Slime",
-    featured: false,
-    imagePath: "/images/products/crunchy-rainbow-slime.jpg"
+    featured: true,
+    imagePath: "/images/products/1742428398750-oops_gameover_tactaslime_img_3234.png"
   },
   {
-    name: "Clear Slime - Ocean Breeze",
-    description: "Crystal clear slime with a refreshing ocean breeze scent.",
-    price: 11.99,
-    inventory: 22,
+    name: "Clear Ocean Slime",
+    description: "A crystal clear slime with ocean-themed glitter and charms.",
+    price: 13.99,
+    inventory: 40,
     category: "Clear Slime",
-    featured: false,
-    imagePath: "/images/products/clear-slime-ocean.jpg"
+    featured: true,
+    imagePath: "/images/products/1742427971497-icecreamparty_tactaslime_img_3220.png"
   },
   {
     name: "Foam Slime - Cotton Candy",

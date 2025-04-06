@@ -28,6 +28,7 @@ export async function GET() {
     // Get all products from the database
     const products = await db.collection('products').find({}).toArray();
     console.log(`API: Successfully fetched ${products.length} products`);
+    console.log('API: Product image paths:', products.map(p => p.imagePath)); // Debug log
     
     // If no products found, provide fallback for testing
     if (!products || products.length === 0) {

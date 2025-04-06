@@ -35,8 +35,15 @@ export default function Home() {
         }
         
         const data = await response.json();
+        console.log('API Response - All products:', data);
+        
         // Filter for featured products from the nested products array
-        const featured = Array.isArray(data.products) ? data.products.filter(product => product.featured) : [];
+        const featured = Array.isArray(data.products) ? data.products.filter(product => {
+          console.log('Product:', product.name, 'Featured:', product.featured, 'ImagePath:', product.imagePath);
+          return product.featured;
+        }) : [];
+        
+        console.log('Filtered featured products:', featured);
         setFeaturedProducts(featured);
       } catch (error) {
         console.error('Error fetching featured products:', error);
@@ -45,6 +52,11 @@ export default function Home() {
     
     fetchFeaturedProducts();
   }, []);
+
+  // Add debug log for featuredProducts state
+  useEffect(() => {
+    console.log('Current featured products state:', featuredProducts);
+  }, [featuredProducts]);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -79,31 +91,20 @@ export default function Home() {
 
   // Function to handle adding a product to cart
   const handleQuickAdd = (product) => {
-    if (!cart || !cart.addToCart) {
-      console.error("Cart context is not available or missing addToCart function");
-      return;
-    }
-
-    setQuickAddProduct(product);
+    if (product.inventory <= 0) return;
     
-    // Create a complete product object
-    const productToAdd = {
-      id: product.id,
+    // Add to cart
+    cart.addToCart({
+      _id: product._id,
       name: product.name,
       price: product.price,
-      image: product.image,
-      description: product.description,
-      quantity: 1
-    };
+      quantity: 1,
+      imagePath: product.imagePath
+    });
     
-    // Add to cart with explicit logging
-    console.log("Adding to cart from homepage:", productToAdd);
-    cart.addToCart(productToAdd, 1);
-    
-    // Reset animation after a delay
-    setTimeout(() => {
-      setQuickAddProduct(null);
-    }, 1500);
+    // Show success message
+    setQuickAddProduct(product);
+    setTimeout(() => setQuickAddProduct(null), 2000);
   };
 
   // Animation variants for staggered children

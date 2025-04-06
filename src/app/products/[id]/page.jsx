@@ -7,8 +7,30 @@ import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+// Helper function to extract YouTube video ID from URL
+const getYouTubeVideoId = (url) => {
+  if (!url) return '';
+  
+  // Handle YouTube Shorts URLs
+  if (url.includes('/shorts/')) {
+    const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+    return shortsMatch ? shortsMatch[1] : '';
+  }
+  
+  // Handle regular YouTube URLs
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+  return match ? match[1] : '';
+};
+
+// Helper function to extract Vimeo video ID from URL
+const getVimeoVideoId = (url) => {
+  if (!url) return '';
+  const match = url.match(/(?:vimeo\.com\/)(\d+)/);
+  return match ? match[1] : '';
+};
+
 export default function ProductDetail({ params }) {
-  const { id } = params;
+  const productId = params.id;
   const cart = useCart();
   const router = useRouter();
   
@@ -18,12 +40,11 @@ export default function ProductDetail({ params }) {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   
-  // Fetch product data
   useEffect(() => {
     async function fetchProduct() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/products/${id}`);
+        const response = await fetch(`/api/products/${productId}`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -37,6 +58,8 @@ export default function ProductDetail({ params }) {
         const data = await response.json();
         
         if (data.success && data.product) {
+          console.log('Product data:', data.product); // Debug log
+          console.log('Video data:', data.product.video); // Debug log
           setProduct(data.product);
         } else {
           setError(data.message || 'Failed to load product');
@@ -50,7 +73,7 @@ export default function ProductDetail({ params }) {
     }
     
     fetchProduct();
-  }, [id]);
+  }, [productId]);
   
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
@@ -128,7 +151,7 @@ export default function ProductDetail({ params }) {
   }
   
   // Product display with real data
-  const productImage = product.imagePath || (product.images && product.images[0] ? product.images[0].url : '/images/placeholder.jpg');
+  const productImage = product.imagePath || '/images/placeholder.jpg';
   
   return (
     <Layout>
@@ -193,6 +216,39 @@ export default function ProductDetail({ params }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
+            {/* Product Video */}
+            {product.video && product.video.url && (
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold mb-2">Product Video</h2>
+                <div className="relative pt-[56.25%] bg-gray-100 rounded-lg overflow-hidden">
+                  {product.video.type === 'youtube' ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.video.url)}?rel=0&modestbranding=1&playsinline=1&origin=${window.location.origin}`}
+                      title={product.video.title || 'Product Video'}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : product.video.type === 'vimeo' ? (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${getVimeoVideoId(product.video.url)}?rel=0`}
+                      title={product.video.title || 'Product Video'}
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={product.video.url}
+                      controls
+                      className="absolute inset-0 w-full h-full"
+                      title={product.video.title || 'Product Video'}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+            
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
               <div className="flex items-center mb-4">

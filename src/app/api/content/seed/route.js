@@ -14,12 +14,22 @@ export async function GET() {
         heroImagePath: '/images/hero/default-hero.jpg',
         featuredTitle: 'Our Popular Collections',
         featuredSubtitle: 'Explore our most loved slimes',
+        video: {
+          url: '',
+          type: 'youtube',
+          title: ''
+        }
       },
       about: {
         heading: 'About Tacta Slime',
         story: 'Founded in 2020, Tacta Slime started as a passion project and quickly grew into a beloved brand...',
         missionTitle: 'Our Mission',
         missionText: 'To create the highest quality slime products that bring joy and sensory satisfaction to people of all ages.',
+        video: {
+          url: '',
+          type: 'youtube',
+          title: ''
+        }
       },
       updatedAt: new Date()
     };

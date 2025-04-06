@@ -36,6 +36,8 @@ export async function POST(request) {
       size: file.size
     });
 
+    const buffer = Buffer.from(await file.arrayBuffer());
+    
     // Create a unique filename
     const timestamp = Date.now();
     const cleanFilename = `${timestamp}-${file.name
@@ -78,19 +80,26 @@ export async function POST(request) {
 
     // Local development: Use filesystem
     console.log('Upload API: Using filesystem storage (local development)');
-    const buffer = Buffer.from(await file.arrayBuffer());
     const publicDir = path.join(process.cwd(), 'public');
     const uploadDir = path.join(publicDir, 'images', 'products');
     
     console.log('Upload API: Creating upload directory:', uploadDir);
-    await mkdir(uploadDir, { recursive: true });
+    try {
+      await mkdir(uploadDir, { recursive: true });
+      console.log('Upload API: Directory created/verified');
+    } catch (err) {
+      console.error('Upload API: Error creating directory:', err);
+      if (err.code !== 'EEXIST') {
+        throw err;
+      }
+    }
     
     const filePath = path.join(uploadDir, cleanFilename);
     console.log('Upload API: Writing file to:', filePath);
     
     await writeFile(filePath, buffer);
     const imagePath = `/images/products/${cleanFilename}`;
-    console.log('Upload API: File saved to filesystem:', imagePath);
+    console.log('Upload API: File successfully saved. Returning path:', imagePath);
     
     return NextResponse.json({ 
       success: true,

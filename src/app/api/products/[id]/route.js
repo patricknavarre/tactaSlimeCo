@@ -106,6 +106,17 @@ export async function PATCH(request, { params }) {
       safeUpdate.image = updateData.imagePath; // Keep both fields in sync
     }
     
+    // Handle video data
+    if (updateData.video) {
+      console.log("Processing video data:", JSON.stringify(updateData.video));
+      safeUpdate.video = {
+        url: updateData.video.url || '',
+        type: updateData.video.type || 'youtube',
+        title: updateData.video.title || ''
+      };
+      console.log("Processed video data:", JSON.stringify(safeUpdate.video));
+    }
+    
     // Handle numeric fields carefully
     if (updateData.inventory !== undefined) {
       safeUpdate.inventory = parseInt(updateData.inventory, 10);
