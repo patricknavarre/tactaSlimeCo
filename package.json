@@ -20,6 +20,7 @@
     "@types/node": "*",
     "@types/react": "*",
     "@types/react-dom": "*",
+    "@vercel/blob": "^0.22.3",
     "axios": "^1.8.3",
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.4.7",

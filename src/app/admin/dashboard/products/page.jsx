@@ -33,20 +33,23 @@ export default function ProductsManagement() {
       let processedProducts = [];
       
       if (Array.isArray(data)) {
-        // New API format returns products directly as an array
-        console.log(`Admin: Successfully loaded ${data.length} products (array format)`);
+        // Array format
         processedProducts = data;
+      } else if (data.products && Array.isArray(data.products)) {
+        // New format with nested products array
+        processedProducts = data.products;
       } else if (data.success && data.products) {
-        // Legacy format with success and products properties
-        console.log(`Admin: Successfully loaded ${data.products.length} products (legacy format)`);
+        // Legacy format with success flag
         processedProducts = data.products;
       } else if (data.error) {
         // Error format
         console.error('Admin: Server returned error:', data.error, data.details);
         alert(`Error loading products: ${data.error}. ${data.details || ''}`);
+        return;
       } else {
         console.error('Admin: Unexpected data format:', data);
         alert('Received unexpected data format from server.');
+        return;
       }
       
       // Inspect the products array structure

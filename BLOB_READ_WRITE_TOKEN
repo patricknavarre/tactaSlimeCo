@@ -1,0 +1,12 @@
+# Created by Vercel CLI
+ADMIN_EMAIL="admin@tactaslime.com"
+ADMIN_PASSWORD="CapeCod123!"
+DEBUG="false"
+MONGODB_DB="tactaSlime"
+MONGODB_URI="mongodb+srv://patnavarre:Zgcr8r24kOzs0puY@tactaslimecluster.hlix3.mongodb.net/tactaSlime?retryWrites=true&w=majority&appName=TactaSlimeCluster"
+NEXTAUTH_SECRET="vCKxr0LBctZobdHzjeempDHjUzgO8dspW0A9io6KiSA="
+NEXTAUTH_URL="https://tacta-slime.vercel.app"
+NEXT_PUBLIC_ADMIN_EMAIL="admin@tactaslime.com"
+NEXT_PUBLIC_ADMIN_PASSWORD="CapeCod123!"
+NEXT_PUBLIC_BACKEND_URL="/api"
+NODE_ENV="production"

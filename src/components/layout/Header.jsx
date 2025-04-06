@@ -9,11 +9,10 @@ import { usePathname } from 'next/navigation';
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   
-  // Close dropdown when pathname changes
+  // Close menu when pathname changes
   useEffect(() => {
-    setIsProductsDropdownOpen(false);
+    setIsMenuOpen(false);
   }, [pathname]);
 
   // Function to check if a link is active
@@ -38,22 +37,6 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
-  // Toggle products dropdown
-  const toggleProductsDropdown = (e) => {
-    e.preventDefault(); // Prevent any navigation
-    setIsProductsDropdownOpen(!isProductsDropdownOpen);
-  };
-
-  // Handle mouse enter for dropdown
-  const handleDropdownMouseEnter = () => {
-    setIsProductsDropdownOpen(true);
-  };
-
-  // Handle mouse leave for dropdown
-  const handleDropdownMouseLeave = () => {
-    setIsProductsDropdownOpen(false);
-  };
-
   return (
     <header className="bg-gradient-to-r from-[#FF1493] to-[#FF7F50] shadow-md relative">
       <div className="container-custom py-4">
@@ -75,13 +58,8 @@ const Header = () => {
           
           <div className="hidden md:flex space-x-4">
             {/* Products dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={handleDropdownMouseEnter}
-              onMouseLeave={handleDropdownMouseLeave}
-            >
+            <div className="relative group">
               <button
-                onClick={toggleProductsDropdown}
                 className={`
                   inline-block px-6 py-2 rounded-full font-bold 
                   text-tacta-pink bg-white
@@ -93,47 +71,47 @@ const Header = () => {
                   transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1
                   ${isProductsActive() ? 'text-[#FF1493] border-[#FF1493] border-b-black border-r-black' : ''}
                 `}
-                aria-expanded={isProductsDropdownOpen}
               >
                 Products
                 <span className="ml-1">▾</span>
               </button>
               
               {/* Products dropdown menu */}
-              {isProductsDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 border-2 border-gray-200 border-b-4 border-r-4 border-black py-2"
+              <div 
+                className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20 
+                  border-2 border-gray-200 border-b-4 border-r-4 border-black py-2
+                  transition-all duration-200 ease-in-out transform origin-top
+                  opacity-0 scale-95 invisible group-hover:opacity-100 group-hover:scale-100 group-hover:visible"
+              >
+                <Link 
+                  href="/products" 
+                  className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  onClick={closeMenu}
                 >
-                  <Link 
-                    href="/products" 
-                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
-                    onClick={() => setIsProductsDropdownOpen(false)}
-                  >
-                    All Products
-                  </Link>
-                  <Link 
-                    href="/products/best-sellers" 
-                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
-                    onClick={() => setIsProductsDropdownOpen(false)}
-                  >
-                    Best Sellers
-                  </Link>
-                  <Link 
-                    href="/products/new-arrivals" 
-                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
-                    onClick={() => setIsProductsDropdownOpen(false)}
-                  >
-                    New Arrivals
-                  </Link>
-                  <Link 
-                    href="/products/sale-items" 
-                    className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
-                    onClick={() => setIsProductsDropdownOpen(false)}
-                  >
-                    Sale Items
-                  </Link>
-                </div>
-              )}
+                  All Products
+                </Link>
+                <Link 
+                  href="/products/best-sellers" 
+                  className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  onClick={closeMenu}
+                >
+                  Best Sellers
+                </Link>
+                <Link 
+                  href="/products/new-arrivals" 
+                  className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  onClick={closeMenu}
+                >
+                  New Arrivals
+                </Link>
+                <Link 
+                  href="/products/sale-items" 
+                  className="block px-4 py-2 text-tacta-pink hover:bg-tacta-pink-light hover:text-white transition-colors"
+                  onClick={closeMenu}
+                >
+                  Sale Items
+                </Link>
+              </div>
             </div>
             
             <Link 

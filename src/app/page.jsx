@@ -37,8 +37,8 @@ export default function Home() {
         const data = await response.json();
         console.log('API Response - All products:', data);
         
-        // Filter for featured products only
-        const featured = Array.isArray(data) ? data.filter(product => {
+        // Filter for featured products from the nested products array
+        const featured = Array.isArray(data.products) ? data.products.filter(product => {
           console.log('Product:', product.name, 'Featured:', product.featured, 'ImagePath:', product.imagePath);
           return product.featured;
         }) : [];
@@ -229,35 +229,26 @@ export default function Home() {
                 variants={itemVariants}
                 className="group relative"
               >
-                <div className="card bg-white rounded-2xl border-2 border-gray-100 hover:border-tacta-pink overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="bg-gradient-to-r from-tacta-pink to-tacta-peach text-white text-sm px-4 py-1 rounded-full uppercase tracking-wider font-semibold shadow-lg">
-                      Featured
-                    </span>
-                  </div>
-                  
-                  {/* Make the entire card clickable except the Add to Cart button */}
-                  <Link href={`/products/${product._id}`} className="block">
+                <Link href={`/products/${product._id}`} className="block">
+                  <div className="card bg-white rounded-2xl border-2 border-gray-100 hover:border-tacta-pink overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className="bg-gradient-to-r from-tacta-pink to-tacta-peach text-white text-sm px-4 py-1 rounded-full uppercase tracking-wider font-semibold shadow-lg">
+                        Featured
+                      </span>
+                    </div>
                     <div className="relative h-72 bg-gradient-to-br from-tacta-cream to-white overflow-hidden">
-                      {product.imagePath && (
+                      {product.imagePath ? (
                         <Image
                           src={product.imagePath}
                           alt={product.name}
                           fill
                           className="object-cover transform group-hover:scale-110 transition-transform duration-500"
-                          onError={() => {
-                            console.error('Image failed to load:', product.imagePath);
-                          }}
                         />
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-tacta-pink/10 to-tacta-peach/10">
-                        <div className="text-center p-4">
-                          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-tacta-pink/20 flex items-center justify-center">
-                            <span className="text-3xl">✨</span>
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-800">{product.name}</h3>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg text-gray-500">{product.name} Image</span>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-3 group-hover:text-tacta-pink transition-colors">
@@ -266,26 +257,51 @@ export default function Home() {
                       <p className="text-gray-600 mb-4">{product.description}</p>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-tacta-pink">${product.price.toFixed(2)}</span>
+                        <motion.button 
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevent navigation when clicking the button
+                            handleQuickAdd(product);
+                          }}
+                          className="btn-primary cartoon-btn px-6 py-3 font-bold text-white"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          disabled={product.inventory <= 0}
+                        >
+                          {product.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
+                        </motion.button>
                       </div>
                     </div>
-                  </Link>
-                  
-                  {/* Add to Cart button outside of the Link */}
-                  <div className="px-6 pb-6">
-                    <motion.button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickAdd(product);
-                      }}
-                      className="btn-primary cartoon-btn px-6 py-3 font-bold text-white w-full"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      disabled={product.inventory <= 0}
-                    >
-                      {product.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
-                    </motion.button>
                   </div>
-                </div>
+                </Link>
+                
+                <AnimatePresence>
+                  {quickAddProduct && quickAddProduct._id === product._id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center"
+                    >
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 10, -10, 10, 0],
+                          scale: [1, 1.2, 1.2, 1.2, 1]
+                        }}
+                        transition={{ duration: 0.5 }}
+                        className="text-6xl mb-4"
+                      >
+                        🎉
+                      </motion.div>
+                      <motion.p 
+                        initial={{ y: 20 }}
+                        animate={{ y: 0 }}
+                        className="font-bold text-xl text-tacta-pink"
+                      >
+                        Added to Cart!
+                      </motion.p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
