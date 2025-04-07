@@ -8,8 +8,29 @@ import { motion } from 'framer-motion';
 export default function MenuPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [content, setContent] = useState({
+    menu: {
+      title: 'Tacta Slime Menu',
+      subtitle: 'Discover our handcrafted slimes available at today\'s market!'
+    }
+  });
 
   useEffect(() => {
+    async function fetchContent() {
+      try {
+        const response = await fetch('/api/content');
+        if (!response.ok) {
+          throw new Error(`Content API responded with status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success && data.content) {
+          setContent(data.content);
+        }
+      } catch (error) {
+        console.error('Error fetching content:', error);
+      }
+    }
+
     async function fetchProducts() {
       try {
         const response = await fetch('/api/products');
@@ -36,6 +57,7 @@ export default function MenuPage() {
       }
     }
     
+    fetchContent();
     fetchProducts();
   }, []);
 
@@ -60,10 +82,10 @@ export default function MenuPage() {
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-              Tacta Slime Menu
+              {content?.menu?.title || 'Tacta Slime Menu'}
             </h1>
             <p className="text-lg mb-8 text-gray-700">
-              Discover our handcrafted slimes available at today's market!
+              {content?.menu?.subtitle || 'Discover our handcrafted slimes available at today\'s market!'}
             </p>
           </div>
         </div>

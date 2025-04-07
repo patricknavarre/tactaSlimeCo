@@ -130,84 +130,44 @@ export default function Home() {
         <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-10 animate-float"></div>
         <div className="container-custom relative z-10">
           <motion.div
-            className="flex flex-col md:flex-row items-center gap-12"
+            className="flex flex-col items-center gap-12 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="md:w-1/2">
+            <div className="max-w-2xl">
               <motion.h1 
                 className="text-5xl md:text-7xl font-bold mb-6 text-white text-shadow-lg"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                {content?.home?.heroTitle}
+                Under Construction
               </motion.h1>
               <motion.p 
                 className="text-xl mb-8 text-white text-shadow-sm"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                {content?.home?.heroSubtitle}
+                We're working on something amazing! In the meantime, check out our current menu.
               </motion.p>
               <motion.div 
-                className="flex flex-wrap gap-6"
+                className="flex justify-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <Link href="/products" className="btn-primary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
-                  {content?.home?.heroButtonText}
-                </Link>
-                <Link href="/about" className="btn-secondary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
-                  Learn More
+                <Link href="/menu" className="btn-primary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform">
+                  View Menu
                 </Link>
               </motion.div>
             </div>
-            <motion.div 
-              className="md:w-1/2 flex justify-center"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
-            >
-              <div className="relative w-full max-w-lg aspect-square rounded-full bg-white/20 backdrop-blur-lg p-8 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
-                {content?.home?.heroImagePath && content.home.heroImagePath !== '' ? (
-                  <>
-                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
-                    <div className="absolute inset-4 rounded-full overflow-hidden">
-                      <Image
-                        src={content.home.heroImagePath}
-                        alt="Tacta Slime Hero"
-                        fill
-                        className="object-cover"
-                        priority
-                        quality={100}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-tacta-pink/40 to-tacta-peach/40 animate-pulse"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <span className="text-6xl mb-4 block">✨</span>
-                        <span className="text-xl text-white font-medium">
-                          Discover Our Magical Slimes
-                        </span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products - Commented out temporarily
       <section className="py-24 bg-gradient-to-b from-white to-tacta-cream">
         <motion.div 
           className="container-custom"
@@ -288,33 +248,20 @@ export default function Home() {
                           scale: [1, 1.2, 1.2, 1.2, 1]
                         }}
                         transition={{ duration: 0.5 }}
-                        className="text-6xl mb-4"
+                        className="text-tacta-pink text-4xl mb-2"
                       >
                         🎉
                       </motion.div>
-                      <motion.p 
-                        initial={{ y: 20 }}
-                        animate={{ y: 0 }}
-                        className="font-bold text-xl text-tacta-pink"
-                      >
-                        Added to Cart!
-                      </motion.p>
+                      <p className="font-bold text-tacta-pink">Added to Cart!</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
             ))}
           </div>
-          <motion.div 
-            className="text-center mt-16"
-            variants={itemVariants}
-          >
-            <Link href="/products" className="btn-secondary cartoon-btn text-lg px-8 py-4 hover:scale-110 transition-transform inline-block">
-              View All Products
-            </Link>
-          </motion.div>
         </motion.div>
       </section>
+      */}
 
       {/* Benefits Section */}
       <section className="py-24 bg-gradient-to-b from-tacta-cream to-white relative overflow-hidden">
