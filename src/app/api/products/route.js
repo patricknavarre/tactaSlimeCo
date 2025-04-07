@@ -75,15 +75,29 @@ export async function POST(request) {
     const body = await request.json();
     console.log('API: Product data received:', body);
     
+    // Convert date strings to Date objects
+    const cleanData = {
+      ...body,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      // Ensure numeric fields are properly typed
+      price: parseFloat(body.price || 0),
+      inventory: parseInt(body.inventory || 0, 10),
+      featured: !!body.featured,
+      sold_out: parseInt(body.inventory || 0, 10) <= 0
+    };
+    
     // Ensure both image fields are set
-    if (body.imagePath) {
-      body.image = body.imagePath; // Keep both fields in sync
+    if (cleanData.imagePath) {
+      cleanData.image = cleanData.imagePath; // Keep both fields in sync
     } else {
-      body.imagePath = '/images/products/default.jpg';
-      body.image = '/images/products/default.jpg';
+      cleanData.imagePath = '/images/products/default.jpg';
+      cleanData.image = '/images/products/default.jpg';
     }
     
-    const result = await db.collection('products').insertOne(body);
+    console.log('API: Cleaned product data:', cleanData);
+    
+    const result = await db.collection('products').insertOne(cleanData);
     console.log('API: Product created with ID:', result.insertedId);
     
     return NextResponse.json({ success: true, insertedId: result.insertedId }, { status: 201 });

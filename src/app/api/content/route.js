@@ -150,6 +150,10 @@ export async function POST(request) {
           title: formData.get('homeVideoTitle') || ''
         }
       },
+      menu: {
+        title: formData.get('menuTitle') || 'Tacta Slime Menu',
+        subtitle: formData.get('menuSubtitle') || 'Discover our handcrafted slimes available at today\'s market!'
+      },
       about: {
         heading: formData.get('aboutHeading'),
         story: formData.get('aboutStory'),
