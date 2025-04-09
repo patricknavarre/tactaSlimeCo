@@ -3,6 +3,45 @@ const fs = require('fs');
 const path = require('path');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
+async function seedToEnvironment(products, isProd = false) {
+  try {
+    // Use production URL if isProd is true, otherwise use local development URL
+    const apiUrl = isProd ? 'https://tactaslime.com' : (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051');
+    const seedUrl = `${apiUrl}/api/seed`;
+    
+    console.log(`Seeding ${products.length} products to ${seedUrl}...`);
+
+    const response = await fetch(seedUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.ADMIN_SECRET}`
+      },
+      body: JSON.stringify({ products })
+    });
+
+    // Log the raw response for debugging
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      throw new Error(`Invalid JSON response: ${responseText}`);
+    }
+
+    if (!response.ok) {
+      throw new Error(result.error || `Failed to seed products: ${response.status} ${response.statusText}`);
+    }
+
+    console.log('Success:', result.message);
+  } catch (error) {
+    console.error(`Error seeding to ${isProd ? 'production' : 'development'}:`, error);
+    throw error;
+  }
+}
+
 async function exportAndSeedProducts() {
   try {
     // Read the exported products
@@ -23,32 +62,25 @@ async function exportAndSeedProducts() {
     // Save updated products back to file
     fs.writeFileSync(exportPath, JSON.stringify(updatedProducts, null, 2));
     
-    // Get the production API URL from environment or use default
-    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
-    const seedUrl = `${apiUrl}/api/seed`;
+    // Seed to development environment
+    await seedToEnvironment(updatedProducts, false);
     
-    console.log(`Seeding ${updatedProducts.length} products to ${seedUrl}...`);
-
-    // Send products to seed API
-    const response = await fetch(seedUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ADMIN_SECRET}`
-      },
-      body: JSON.stringify({ products: updatedProducts })
+    // Ask user if they want to seed to production
+    console.log('\nWould you like to seed to production (tactaslime.com)? Type "yes" to proceed:');
+    process.stdin.once('data', async (data) => {
+      const answer = data.toString().trim().toLowerCase();
+      if (answer === 'yes') {
+        try {
+          await seedToEnvironment(updatedProducts, true);
+        } catch (error) {
+          console.error('Error seeding to production:', error);
+        }
+      }
+      process.exit(0);
     });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to seed products');
-    }
-
-    console.log('Success:', result.message);
-
   } catch (error) {
-    console.error('Error seeding products:', error);
+    console.error('Error in export and seed process:', error);
     process.exit(1);
   }
 }
