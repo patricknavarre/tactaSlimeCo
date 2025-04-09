@@ -330,6 +330,7 @@ export default function ProductDetail({ params }) {
                 }
               </motion.button>
               
+              {/* Temporarily disabled Shopify integration
               <motion.button
                 className="w-full cartoon-btn btn-secondary"
                 whileHover={{ scale: 1.02 }}
@@ -337,6 +338,7 @@ export default function ProductDetail({ params }) {
               >
                 Buy Now with Shopify
               </motion.button>
+              */}
             </div>
             
             <div className="mt-8 text-sm text-gray-500">
