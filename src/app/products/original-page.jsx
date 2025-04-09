@@ -12,11 +12,13 @@ const categories = [
   'All Categories',
   'Cloud Slime',
   'Butter Slime',
+  'Clear Slime',
+  'Butter & Clear Mix',
   'Glitter Slime',
   'Crunchy Slime',
-  'Clear Slime',
   'Foam Slime',
-  'Video Game Slime'
+  'Video Game Slime',
+  'Floam'
 ];
 
 // Create a client component that uses useSearchParams and wrap it in Suspense
