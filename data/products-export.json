@@ -14,8 +14,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Boba Fun Slime",
@@ -32,12 +32,12 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Skincare Sundays Slime",
-    "description": "Multi-colored slime with crunchy beads for a satisfying texture.",
+    "description": "Light Purple Butter Slime + Clear Glitter Slime. Lotion & Comb Charms. ",
     "price": 14.99,
     "inventory": 2,
     "category": "Butter & Clear Mix",
@@ -50,8 +50,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Clear Slime - Ocean Breeze",
@@ -68,8 +68,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Ice Cream Party",
@@ -86,8 +86,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Oops - Game Over ",
@@ -108,8 +108,8 @@
       "type": "youtube",
       "title": "Oops Game Over :)"
     },
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Oops Game Over - Green",
@@ -126,8 +126,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Glam Squad",
@@ -144,8 +144,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Girl You Pretty ",
@@ -154,16 +154,16 @@
     "inventory": 2,
     "category": "Clear Slime",
     "featured": false,
-    "imagePath": "/images/products/default.jpg",
+    "imagePath": "/images/products/1744232674446-girlyoupretty_tacta.png",
     "images": [
       {
-        "url": "/images/products/default.jpg",
+        "url": "/images/products/1744232674446-girlyoupretty_tacta.png",
         "alt": "Girl You Pretty "
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Digging For Gold",
@@ -180,8 +180,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Boba Fun - Dark Purple",
@@ -198,8 +198,8 @@
       }
     ],
     "video": null,
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Bubble & Pop ",
@@ -215,8 +215,9 @@
         "alt": "Bubble & Pop "
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Bubble & Pop",
@@ -232,8 +233,9 @@
         "alt": "Bubble & Pop"
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Bubble & Pop",
@@ -249,8 +251,9 @@
         "alt": "Bubble & Pop"
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Mango Sticky Rice ",
@@ -266,8 +269,9 @@
         "alt": "Mango Sticky Rice "
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Ice Cream Party - Orange Creamsicle",
@@ -283,8 +287,9 @@
         "alt": "Ice Cream Party - Orange Creamsicle"
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Slushie Puff",
@@ -300,8 +305,9 @@
         "alt": "Slushie Puff"
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Go Sports ",
@@ -310,15 +316,16 @@
     "inventory": 1,
     "category": "Butter & Clear Mix",
     "featured": false,
-    "imagePath": "/images/products/default.jpg",
+    "imagePath": "/images/products/1744232566142-gosports_tacta.png",
     "images": [
       {
-        "url": "/images/products/default.jpg",
+        "url": "/images/products/1744232566142-gosports_tacta.png",
         "alt": "Go Sports "
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Milkshake Party ",
@@ -334,8 +341,9 @@
         "alt": "Milkshake Party "
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   },
   {
     "name": "Earth In Spring",
@@ -351,7 +359,8 @@
         "alt": "Earth In Spring"
       }
     ],
-    "createdAt": "2025-04-09T20:58:04.090Z",
-    "updatedAt": "2025-04-09T20:58:04.090Z"
+    "video": null,
+    "createdAt": "2025-04-09T21:10:10.032Z",
+    "updatedAt": "2025-04-09T21:10:10.032Z"
   }
 ]

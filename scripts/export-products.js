@@ -1,58 +1,56 @@
 require('dotenv').config({ path: '.env.local' });
-const { MongoClient } = require('mongodb');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-async function exportProducts() {
+async function exportAndSeedProducts() {
   try {
-    const uri = process.env.MONGODB_URI;
-    if (!uri) {
-      throw new Error('MONGODB_URI environment variable is not set');
-    }
-    
-    const client = new MongoClient(uri);
-    
-    await client.connect();
-    const db = client.db('tactaSlime');
-    
-    // Get all products
-    const products = await db.collection('products').find({}).toArray();
-    
-    // Format products for seed API
-    const formattedProducts = products.map(product => ({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      inventory: product.inventory,
-      category: product.category,
-      featured: product.featured,
-      imagePath: product.imagePath,
-      images: product.images || [{
+    // Read the exported products
+    const exportPath = path.join(process.cwd(), 'data', 'products-export.json');
+    const products = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
+
+    // Ensure image paths are properly synced
+    const updatedProducts = products.map(product => ({
+      ...product,
+      images: [{
         url: product.imagePath,
         alt: product.name
       }],
-      video: product.video,
       createdAt: new Date(),
       updatedAt: new Date()
     }));
+
+    // Save updated products back to file
+    fs.writeFileSync(exportPath, JSON.stringify(updatedProducts, null, 2));
     
-    // Save to a file
-    const exportDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(exportDir)) {
-      fs.mkdirSync(exportDir, { recursive: true });
+    // Get the production API URL from environment or use default
+    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
+    const seedUrl = `${apiUrl}/api/seed`;
+    
+    console.log(`Seeding ${updatedProducts.length} products to ${seedUrl}...`);
+
+    // Send products to seed API
+    const response = await fetch(seedUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.ADMIN_SECRET}`
+      },
+      body: JSON.stringify({ products: updatedProducts })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to seed products');
     }
-    
-    const exportPath = path.join(exportDir, 'products-export.json');
-    fs.writeFileSync(exportPath, JSON.stringify(formattedProducts, null, 2));
-    
-    console.log(`Exported ${formattedProducts.length} products to ${exportPath}`);
-    
-    await client.close();
-    
+
+    console.log('Success:', result.message);
+
   } catch (error) {
-    console.error('Error exporting products:', error);
+    console.error('Error seeding products:', error);
     process.exit(1);
   }
 }
 
-exportProducts(); 
+exportAndSeedProducts(); 
