@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env.production' });
+require('dotenv').config({ path: '.env.local' });
 const fs = require('fs');
 const path = require('path');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -10,7 +10,7 @@ async function seedProducts() {
     const products = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
 
     // Get the production API URL from environment or use default
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
     const seedUrl = `${apiUrl}/api/seed`;
     
     console.log(`Seeding ${products.length} products to ${seedUrl}...`);
