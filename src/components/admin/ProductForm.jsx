@@ -217,17 +217,19 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
               Category*
             </label>
             <select
-              id="category"
               {...register('category', { required: 'Category is required' })}
-              className={`input-field mt-1 ${errors.category ? 'border-red-500' : ''}`}
+              className={`input-field ${errors.category ? 'border-red-500' : ''}`}
             >
               <option value="">Select a category</option>
               <option value="Cloud Slime">Cloud Slime</option>
               <option value="Butter Slime">Butter Slime</option>
+              <option value="Clear Slime">Clear Slime</option>
+              <option value="Butter & Clear Mix">Butter & Clear Mix</option>
               <option value="Glitter Slime">Glitter Slime</option>
               <option value="Crunchy Slime">Crunchy Slime</option>
-              <option value="Clear Slime">Clear Slime</option>
               <option value="Foam Slime">Foam Slime</option>
+              <option value="Video Game Slime">Video Game Slime</option>
+              <option value="Floam">Floam</option>
             </select>
             {errors.category && (
               <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>

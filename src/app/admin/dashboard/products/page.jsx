@@ -200,10 +200,12 @@ export default function ProductsManagement() {
                       <option value="">All Categories</option>
                       <option value="cloud-slime">Cloud Slime</option>
                       <option value="butter-slime">Butter Slime</option>
+                      <option value="clear-slime">Clear Slime</option>
+                      <option value="butter-and-clear-mix">Butter & Clear Mix</option>
                       <option value="glitter-slime">Glitter Slime</option>
                       <option value="crunchy-slime">Crunchy Slime</option>
-                      <option value="clear-slime">Clear Slime</option>
                       <option value="foam-slime">Foam Slime</option>
+                      <option value="floam">Floam</option>
                     </select>
                     
                     <select className="input-field py-1.5 text-sm w-40">

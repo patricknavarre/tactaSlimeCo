@@ -1,0 +1,366 @@
+[
+  {
+    "name": "Citrus Storm",
+    "description": "Soft and spreadable butter slime with a delightful citrus scent.",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Cloud Slime",
+    "featured": true,
+    "imagePath": "/images/products/1743094873447-tacta_citrus_img_3385.png",
+    "images": [
+      {
+        "url": "/images/products/1743094873447-tacta_citrus_img_3385.png",
+        "alt": "Citrus Storm"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Boba Fun Slime",
+    "description": "Clear slime with glitter",
+    "price": 14.99,
+    "inventory": 0,
+    "category": "Clear Slime",
+    "featured": true,
+    "imagePath": "/images/products/1743094272557-tacta_boba_img_3388.png",
+    "images": [
+      {
+        "url": "/images/products/1743094272557-tacta_boba_img_3388.png",
+        "alt": "Boba Fun Slime"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Skincare Sundays Slime",
+    "description": "Light Purple Butter Slime + Clear Glitter Slime. Lotion & Comb Charms. ",
+    "price": 14.99,
+    "inventory": 2,
+    "category": "Butter & Clear Mix",
+    "featured": false,
+    "imagePath": "/images/products/1743094337892-tacta_skincare)img_3393.png",
+    "images": [
+      {
+        "url": "/images/products/1743094337892-tacta_skincare)img_3393.png",
+        "alt": "Skincare Sundays Slime"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Clear Slime - Ocean Breeze",
+    "description": "Crystal clear slime with a refreshing ocean breeze scent.",
+    "price": 14.99,
+    "inventory": 22,
+    "category": "Clear Slime",
+    "featured": false,
+    "imagePath": "/images/products/1743097097820-oops_gameover_tactaslime_img_3234.png",
+    "images": [
+      {
+        "url": "/images/products/1743097097820-oops_gameover_tactaslime_img_3234.png",
+        "alt": "Clear Slime - Ocean Breeze"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Ice Cream Party",
+    "description": "Butter slime with Ice Cream Party charms. ",
+    "price": 14.99,
+    "inventory": 2,
+    "category": "Butter Slime",
+    "featured": false,
+    "imagePath": "/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png",
+    "images": [
+      {
+        "url": "/images/products/1742428559580-icecreamparty_tactaslime_img_3238.png",
+        "alt": "Ice Cream Party"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Oops - Game Over ",
+    "description": "Video Game Slime with Game Controller & Star Pieces.  \nScent-Apple Cinnamon \nTexture- Jelly Cubes",
+    "price": 14.99,
+    "inventory": 2,
+    "category": "Glitter Slime",
+    "featured": true,
+    "imagePath": "/images/products/1742674009849-oops_gameover_tactaslime_img_3234.png",
+    "images": [
+      {
+        "url": "/images/products/1742674009849-oops_gameover_tactaslime_img_3234.png",
+        "alt": "Oops - Game Over "
+      }
+    ],
+    "video": {
+      "url": "https://youtube.com/shorts/C4c2MeBz4L0",
+      "type": "youtube",
+      "title": "Oops Game Over :)"
+    },
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Oops Game Over - Green",
+    "description": "Green Butter and Clear Green Slime",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Butter Slime",
+    "featured": false,
+    "imagePath": "/images/products/1744229047076-oopsgameover-green_img_3404.png",
+    "images": [
+      {
+        "url": "/images/products/1744229047076-oopsgameover-green_img_3404.png",
+        "alt": "Oops Game Over - Green"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Glam Squad",
+    "description": "Clear Pink Slim with Makeup Charm",
+    "price": 14.99,
+    "inventory": 4,
+    "category": "Clear Slime",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Glam Squad"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Girl You Pretty ",
+    "description": "Purple Clear Slime with Jelly Cubes and Perfume Charms",
+    "price": 14.99,
+    "inventory": 2,
+    "category": "Clear Slime",
+    "featured": false,
+    "imagePath": "/images/products/1744232674446-girlyoupretty_tacta.png",
+    "images": [
+      {
+        "url": "/images/products/1744232674446-girlyoupretty_tacta.png",
+        "alt": "Girl You Pretty "
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Digging For Gold",
+    "description": "Clear Slime with Gold Sparkles",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Glitter Slime",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Digging For Gold"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Boba Fun - Dark Purple",
+    "description": "Clear Slime with Pink Boba Charm",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Clear Slime",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Boba Fun - Dark Purple"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Bubble & Pop ",
+    "description": "Blue with White Bubbles",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Floam",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Bubble & Pop "
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Bubble & Pop",
+    "description": "Red with White Bubbles. ",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Floam",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Bubble & Pop"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Bubble & Pop",
+    "description": "Clear with Rainbow Bubbles",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Floam",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Bubble & Pop"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Mango Sticky Rice ",
+    "description": "Mango with White Bubbles",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Floam",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Mango Sticky Rice "
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Ice Cream Party - Orange Creamsicle",
+    "description": "Orange Butter Slime with Charms",
+    "price": 14.99,
+    "inventory": 3,
+    "category": "Butter Slime",
+    "featured": false,
+    "imagePath": "/images/products/1744231287242-icecreamparty_orangecreamsicle.png",
+    "images": [
+      {
+        "url": "/images/products/1744231287242-icecreamparty_orangecreamsicle.png",
+        "alt": "Ice Cream Party - Orange Creamsicle"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Slushie Puff",
+    "description": "Clear Bucket w Mint Scented Snow Slime",
+    "price": 14.99,
+    "inventory": 2,
+    "category": "Cloud Slime",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Slushie Puff"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Go Sports ",
+    "description": "Green Butter Slime with Clear Green Glitter Slime Combo - Sports Charm",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Butter & Clear Mix",
+    "featured": false,
+    "imagePath": "/images/products/1744232566142-gosports_tacta.png",
+    "images": [
+      {
+        "url": "/images/products/1744232566142-gosports_tacta.png",
+        "alt": "Go Sports "
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Milkshake Party ",
+    "description": "Clear Blue & Purple Glitter with Purple Boba Charm",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Butter & Clear Mix",
+    "featured": false,
+    "imagePath": "/images/products/default.jpg",
+    "images": [
+      {
+        "url": "/images/products/default.jpg",
+        "alt": "Milkshake Party "
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  },
+  {
+    "name": "Earth In Spring",
+    "description": "Light Green Butter Slime + Dark Green Clear Slime. Plant Charm",
+    "price": 14.99,
+    "inventory": 1,
+    "category": "Butter & Clear Mix",
+    "featured": false,
+    "imagePath": "/images/products/1744232124951-earthinspring_tactapic.png",
+    "images": [
+      {
+        "url": "/images/products/1744232124951-earthinspring_tactapic.png",
+        "alt": "Earth In Spring"
+      }
+    ],
+    "video": null,
+    "createdAt": "2025-04-09T21:12:17.682Z",
+    "updatedAt": "2025-04-09T21:12:17.682Z"
+  }
+]

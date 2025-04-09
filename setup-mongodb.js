@@ -34,7 +34,8 @@ const categories = [
   "Butter Slime",
   "Glitter Slime",
   "Clear Slime",
-  "Foam Slime"
+  "Foam Slime",
+  "Floam"
 ];
 
 categories.forEach(category => {
