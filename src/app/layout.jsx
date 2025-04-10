@@ -1,10 +1,18 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
+import { Fredoka } from 'next/font/google';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import Providers from '@/components/Providers';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+});
+
+const fredoka = Fredoka({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-fredoka',
 });
 
 export const metadata = {
@@ -14,11 +22,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fredoka.variable}`}>
       <ThemeProvider>
-        <body>
-          {children}
-        </body>
+        <Providers>
+          <body>
+            {children}
+          </body>
+        </Providers>
       </ThemeProvider>
     </html>
   );

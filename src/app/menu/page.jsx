@@ -78,22 +78,34 @@ export default function MenuPage() {
 
   return (
     <Layout>
-      <section className="py-16 bg-gradient-to-r from-tacta-pink-light to-tacta-peach-light">
-        <div className="container-custom">
+      <section className="py-16 bg-gradient-to-r from-tacta-pink-light to-tacta-peach-light relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/bubble-pattern.png')] opacity-10 animate-float"></div>
+        <div className="container-custom relative">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+            <motion.h1 
+              className="text-4xl md:text-6xl font-bold mb-6 text-tacta-pink font-display"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               {content?.menu?.title || 'Tacta Slime Menu'}
-            </h1>
-            <p className="text-lg mb-8 text-gray-700">
+            </motion.h1>
+            <motion.p 
+              className="text-xl mb-8 text-gray-700"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
               {content?.menu?.subtitle || 'Discover our handcrafted slimes available at today\'s market!'}
-            </p>
+            </motion.p>
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-16 bg-white relative">
+        <div className="absolute inset-0 bg-[url('/images/confetti-pattern.png')] opacity-5"></div>
         <motion.div 
-          className="container-custom"
+          className="container-custom relative"
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -104,9 +116,15 @@ export default function MenuPage() {
               variants={itemVariants}
               className="mb-16"
             >
-              <h2 className="text-3xl font-bold mb-8 text-tacta-pink border-b-2 border-tacta-pink pb-2">
-                {category}
-              </h2>
+              <div className="flex items-center mb-8">
+                <motion.h2 
+                  className="text-3xl font-bold text-tacta-pink font-display relative inline-block"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {category}
+                  <div className="absolute -bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-tacta-pink to-tacta-peach rounded-full transform -skew-x-12"></div>
+                </motion.h2>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {products
                   .filter(product => product.category === category)
@@ -114,23 +132,31 @@ export default function MenuPage() {
                     <motion.div 
                       key={product._id}
                       variants={itemVariants}
-                      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                      whileHover={{ 
+                        scale: 1.03,
+                        transition: { duration: 0.2 }
+                      }}
+                      className="bg-gradient-to-br from-white to-tacta-pink-light rounded-2xl shadow-lg overflow-hidden border-2 border-tacta-pink border-opacity-20 group"
                     >
-                      <div className="relative h-48">
+                      <div className="relative h-56 overflow-hidden">
                         {product.imagePath && (
                           <Image
                             src={product.imagePath}
                             alt={product.name}
                             fill
-                            className="object-cover"
+                            className="object-cover transform group-hover:scale-110 transition-transform duration-300"
                           />
                         )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-bold mb-2 text-gray-900">
+                      <div className="p-6 relative">
+                        <motion.h3 
+                          className="text-2xl font-bold mb-3 text-tacta-pink font-display"
+                          whileHover={{ scale: 1.02 }}
+                        >
                           {product.name}
-                        </h3>
-                        <p className="text-gray-600 mb-4 text-sm">
+                        </motion.h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
                           {product.description}
                         </p>
                       </div>
@@ -141,6 +167,21 @@ export default function MenuPage() {
           ))}
         </motion.div>
       </section>
+
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+
+        .font-display {
+          font-family: var(--font-fredoka), system-ui, sans-serif;
+        }
+      `}</style>
     </Layout>
   );
 } 
