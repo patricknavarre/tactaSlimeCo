@@ -51,6 +51,11 @@ export async function POST(request) {
     if (process.env.VERCEL || process.env.VERCEL_ENV) {
       try {
         console.log('Upload API: Attempting Vercel Blob storage upload');
+        if (!process.env.BLOB_READ_WRITE_TOKEN) {
+          console.warn('Upload API: BLOB_READ_WRITE_TOKEN is not set, falling back to filesystem storage');
+          throw new Error('BLOB_READ_WRITE_TOKEN not configured');
+        }
+        
         const { url } = await blob.put(cleanFilename, file, {
           access: 'public',
           addRandomSuffix: false
@@ -68,18 +73,15 @@ export async function POST(request) {
           stack: blobError.stack,
           code: blobError.code
         });
-        return NextResponse.json({ 
-          error: 'Blob storage error',
-          details: blobError.message,
-          envInfo,
-          stack: blobError.stack,
-          code: blobError.code
-        }, { status: 500 });
+        
+        // Instead of returning an error, fall back to filesystem storage
+        console.log('Upload API: Falling back to filesystem storage after Blob error');
+        // Continue to filesystem storage logic below
       }
     }
 
-    // Local development: Use filesystem
-    console.log('Upload API: Using filesystem storage (local development)');
+    // Use filesystem for local dev or as fallback when Blob storage fails
+    console.log('Upload API: Using filesystem storage');
     const publicDir = path.join(process.cwd(), 'public');
     const uploadDir = path.join(publicDir, 'images', 'products');
     
@@ -104,7 +106,7 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: true,
       imagePath: imagePath,
-      environment: 'local',
+      environment: process.env.VERCEL ? 'vercel-filesystem-fallback' : 'local',
       envInfo
     });
     
