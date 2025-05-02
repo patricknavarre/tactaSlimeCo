@@ -76,13 +76,22 @@ export default function ProductsManagement() {
 
   // Function to handle product deletion
   const handleDeleteProduct = async (productId) => {
-    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this product?')) {
       return;
     }
 
     setDeletingProductId(productId);
     try {
-      const result = await deleteProduct(productId);
+      console.log("Attempting to delete product:", productId);
+      
+      // Try direct API call for debugging
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+      });
+      
+      console.log("Delete response status:", response.status);
+      const result = await response.json();
+      console.log("Delete response data:", result);
       
       if (result.success) {
         // Remove the product from the state if deletion was successful
