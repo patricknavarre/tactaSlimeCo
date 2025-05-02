@@ -93,6 +93,15 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
         throw new Error('Invalid response from server');
       }
 
+      // Check if we're in production mode
+      if (data.environment === 'vercel') {
+        setUploadError(
+          'NOTE: In production mode, images need to be manually added to the project. ' +
+          'The image path has been set, but you will need to add the actual image file to the project repository ' +
+          'and redeploy. For now, you can continue creating the product.'
+        );
+      }
+
       console.log('Setting imagePath:', data.imagePath);
       // Set the imagePath in the form
       setValue('imagePath', data.imagePath);

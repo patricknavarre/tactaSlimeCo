@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import * as blob from '@vercel/blob';
 
 // Get base URL for the current environment
 function getBaseUrl() {
@@ -16,7 +15,6 @@ export async function POST(request) {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
     IS_VERCEL: process.env.VERCEL,
-    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN,
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_REGION: process.env.VERCEL_REGION
   };
@@ -44,6 +42,18 @@ export async function POST(request) {
       size: file.size
     });
 
+    // Check if file size is too large (e.g., over 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { 
+          error: 'File too large', 
+          details: 'Maximum file size is 10MB',
+          envInfo
+        },
+        { status: 400 }
+      );
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     
     // Create a unique filename
@@ -55,61 +65,26 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Check environment - Production (Vercel) vs Development
+    // Check if in production environment
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
     
     if (isProduction) {
-      // PRODUCTION ENVIRONMENT - Must use Blob Storage
-      try {
-        console.log('Upload API: Production environment, attempting Vercel Blob storage upload');
-        
-        if (!process.env.BLOB_READ_WRITE_TOKEN) {
-          console.error('Upload API: BLOB_READ_WRITE_TOKEN is not set in production environment');
-          return NextResponse.json(
-            { 
-              error: 'Server configuration error', 
-              details: 'Blob storage token not configured in production environment',
-              envInfo
-            },
-            { status: 500 }
-          );
-        }
-        
-        const { url } = await blob.put(cleanFilename, file, {
-          access: 'public',
-          addRandomSuffix: false
-        });
-        
-        console.log('Upload API: Successfully uploaded to Blob Storage:', url);
-        return NextResponse.json({ 
-          success: true,
-          imagePath: url,
-          environment: 'vercel',
-          envInfo
-        });
-      } catch (blobError) {
-        console.error('Upload API: Blob storage error:', {
-          message: blobError.message,
-          stack: blobError.stack,
-          code: blobError.code
-        });
-        
-        // Try a different approach for production - return a full URL to the image
-        // This assumes the image might be deployed with the site
-        const imagePath = `/images/products/${cleanFilename}`;
-        const siteUrl = getBaseUrl();
-        const fullImageUrl = `${siteUrl}${imagePath}`;
-        
-        console.log('Upload API: Fallback to absolute URL:', fullImageUrl);
-        
-        return NextResponse.json({ 
-          success: true,
-          imagePath: fullImageUrl,
-          environment: 'vercel-fallback',
-          message: 'Using fallback method due to Blob storage issues',
-          envInfo
-        });
-      }
+      // In production, we don't write to the filesystem directly
+      // Instead, we return a path that will work after deployment
+      console.log('Upload API: Production environment detected');
+      
+      // Return path to the image that would be at this location when deployed
+      const imagePath = `/images/products/${cleanFilename}`;
+      console.log('Upload API: Generated image path for production:', imagePath);
+      
+      return NextResponse.json({ 
+        success: true,
+        imagePath: imagePath,
+        environment: 'vercel',
+        message: 'Production mode: Using static image path',
+        note: 'In production, upload image manually then rebuild/redeploy',
+        envInfo
+      });
     } else {
       // DEVELOPMENT ENVIRONMENT - Use local filesystem
       console.log('Upload API: Development environment, using filesystem storage');
