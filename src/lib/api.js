@@ -156,7 +156,7 @@ export async function createProduct(productData) {
       description: productData.description || '',
       category: productData.category || 'Uncategorized',
       featured: !!productData.featured,
-      imagePath: productData.imagePath || '/images/TactaLogo_image001.png', // Use a logo that exists
+      imagePath: productData.imagePath || '/images/placeholder.jpg', // Use a placeholder that exists
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -174,11 +174,11 @@ export async function createProduct(productData) {
 
     console.log(`Creating product with data: ${JSON.stringify(cleanData)}`);
     
-    // Directly use fetch for this operation
-    const url = `${BACKEND_URL}/api/products`;
-    console.log(`Creating product at URL: ${url}`);
+    // ABSOLUTE DIRECT URL - NO PATH CONSTRUCTION
+    const absoluteUrl = 'http://localhost:5051/api/products';
+    console.log(`Using direct URL for product creation: ${absoluteUrl}`);
     
-    const response = await fetch(url, {
+    const response = await fetch(absoluteUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -187,7 +187,8 @@ export async function createProduct(productData) {
     });
     
     if (!response.ok) {
-      throw new Error(`Failed to create product: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to create product: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
