@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-05-02T21:05:47.370Z",
-  "imageCount": 54,
+  "timestamp": "2025-05-02T21:11:23.108Z",
+  "imageCount": 50,
   "images": [
     {
       "filename": "1742427916349-icecreamparty_tactaslime_img_3220.png",
@@ -201,22 +201,6 @@
     {
       "filename": "1746218905699-sweetsurprise2_tactaslime.png",
       "path": "/images/products/1746218905699-sweetsurprise2_tactaslime.png"
-    },
-    {
-      "filename": "1746219126683-icecreamtaba_tactaslime.png",
-      "path": "/images/products/1746219126683-icecreamtaba_tactaslime.png"
-    },
-    {
-      "filename": "1746219348419-pawtaba_tactaslime.png",
-      "path": "/images/products/1746219348419-pawtaba_tactaslime.png"
-    },
-    {
-      "filename": "1746219399830-strawberrytaba_tactaslime.png",
-      "path": "/images/products/1746219399830-strawberrytaba_tactaslime.png"
-    },
-    {
-      "filename": "1746219462709-greencupcaketaba_tactaslime.png",
-      "path": "/images/products/1746219462709-greencupcaketaba_tactaslime.png"
     }
   ]
 }
