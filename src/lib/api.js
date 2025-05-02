@@ -12,7 +12,14 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:505
  * @returns {Promise<Object>} - The response data
  */
 export async function fetchFromAPI(endpoint, options = {}) {
-  const url = `${BACKEND_URL}/api/${endpoint}`;
+  // Completely fix URL construction
+  // Remove any 'api/' prefix to avoid duplication
+  const cleanedEndpoint = endpoint.replace(/^api\/?/, '');
+  
+  // Construct proper URL
+  const url = `${BACKEND_URL}/api/${cleanedEndpoint}`;
+  
+  console.log(`API Request (${options.method || 'GET'}): ${url}`);
   
   try {
     const response = await fetch(url, {
@@ -24,8 +31,27 @@ export async function fetchFromAPI(endpoint, options = {}) {
     });
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'API request failed');
+      let errorMessage = `API request failed with status: ${response.status}`;
+      
+      try {
+        // Clone the response before reading it
+        const clonedResponse = response.clone();
+        const errorData = await clonedResponse.json();
+        if (errorData && errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (parseError) {
+        // If we can't parse as JSON, try to get text
+        try {
+          const errorText = await response.text();
+          errorMessage += ` Response: ${errorText.substring(0, 100)}...`;
+        } catch (textError) {
+          // If we can't read text, just use the status
+          console.error('Cannot read error response:', textError);
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
     
     return await response.json();
@@ -84,22 +110,13 @@ export const del = async (endpoint) => {
 
 // API client utilities for interacting with backend
 
-// Base URL for API requests
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5053';
-
 /**
  * Fetches all products from the API
  */
 export async function fetchProducts() {
   try {
-    console.log('Fetching products from:', `${API_BASE_URL}api/products`);
-    const response = await fetch(`${API_BASE_URL}api/products`);
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching products: ${response.status}`);
-    }
-    
-    const data = await response.json();
+    console.log('Fetching all products');
+    const data = await get('products');
     console.log('Products data received:', data);
     return data.products;
   } catch (error) {
@@ -113,25 +130,8 @@ export async function fetchProducts() {
  */
 export async function fetchProductById(id) {
   try {
-    console.log(`Fetching product with ID: ${id} from: ${API_BASE_URL}api/products/${id}`);
-    
-    // Make sure we're using the correct URL format
-    const url = `${API_BASE_URL}api/products/${id}`;
-    console.log('Full request URL:', url);
-    
-    const response = await fetch(url);
-    
-    // Log response status
-    console.log(`Product fetch response status: ${response.status}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response body:', errorText);
-      throw new Error(`Error fetching product: ${response.status}. Details: ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Product data received:', data);
+    console.log(`Fetching product with ID: ${id}`);
+    const data = await get(`products/${id}`);
     
     if (!data.product) {
       console.error('No product data in response:', data);
@@ -156,7 +156,7 @@ export async function createProduct(productData) {
       description: productData.description || '',
       category: productData.category || 'Uncategorized',
       featured: !!productData.featured,
-      imagePath: productData.imagePath || '/images/products/default.jpg',
+      imagePath: productData.imagePath || '/images/TactaLogo_image001.png', // Use a logo that exists
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -174,7 +174,11 @@ export async function createProduct(productData) {
 
     console.log(`Creating product with data: ${JSON.stringify(cleanData)}`);
     
-    const response = await fetch(`${API_BASE_URL}/api/products`, {
+    // Directly use fetch for this operation
+    const url = `${BACKEND_URL}/api/products`;
+    console.log(`Creating product at URL: ${url}`);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -182,13 +186,12 @@ export async function createProduct(productData) {
       body: JSON.stringify(cleanData),
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
-      console.error('API Error:', data);
-      throw new Error(data.message || `Error creating product: ${response.status}`);
+      throw new Error(`Failed to create product: ${response.status}`);
     }
     
+    const data = await response.json();
+    console.log('Product created successfully:', data);
     return data;
   } catch (error) {
     console.error('Failed to create product:', error);
@@ -226,21 +229,9 @@ export async function updateProduct(id, productData) {
 
     console.log(`Updating product with data: ${JSON.stringify(cleanData)}`);
     
-    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(cleanData),
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      console.error('API Error:', data);
-      throw new Error(data.message || `Error updating product: ${response.status}`);
-    }
-    
+    // Use the put helper which uses fetchFromAPI internally for consistent URL handling
+    const data = await put(`products/${id}`, cleanData);
+    console.log(`Product ${id} updated successfully:`, data);
     return data;
   } catch (error) {
     console.error(`Failed to update product ${id}:`, error);
@@ -253,15 +244,12 @@ export async function updateProduct(id, productData) {
  */
 export async function deleteProduct(id) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
-      method: 'DELETE',
-    });
+    console.log(`Deleting product with ID: ${id}`);
     
-    if (!response.ok) {
-      throw new Error(`Error deleting product: ${response.status}`);
-    }
-    
-    const data = await response.json();
+    // Use the del helper which uses fetchFromAPI internally
+    // This ensures consistent URL handling
+    const data = await del(`products/${id}`);
+    console.log(`Product ${id} deleted successfully:`, data);
     return data;
   } catch (error) {
     console.error(`Failed to delete product ${id}:`, error);

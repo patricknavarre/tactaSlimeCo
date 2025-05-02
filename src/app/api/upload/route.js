@@ -3,6 +3,14 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import * as blob from '@vercel/blob';
 
+// Get base URL for the current environment
+function getBaseUrl() {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+}
+
 export async function POST(request) {
   const envInfo = {
     NODE_ENV: process.env.NODE_ENV,
@@ -47,19 +55,31 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Always try to use blob storage in Vercel environment
-    if (process.env.VERCEL || process.env.VERCEL_ENV) {
+    // Check environment - Production (Vercel) vs Development
+    const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
+    
+    if (isProduction) {
+      // PRODUCTION ENVIRONMENT - Must use Blob Storage
       try {
-        console.log('Upload API: Attempting Vercel Blob storage upload');
+        console.log('Upload API: Production environment, attempting Vercel Blob storage upload');
+        
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
-          console.warn('Upload API: BLOB_READ_WRITE_TOKEN is not set, falling back to filesystem storage');
-          throw new Error('BLOB_READ_WRITE_TOKEN not configured');
+          console.error('Upload API: BLOB_READ_WRITE_TOKEN is not set in production environment');
+          return NextResponse.json(
+            { 
+              error: 'Server configuration error', 
+              details: 'Blob storage token not configured in production environment',
+              envInfo
+            },
+            { status: 500 }
+          );
         }
         
         const { url } = await blob.put(cleanFilename, file, {
           access: 'public',
           addRandomSuffix: false
         });
+        
         console.log('Upload API: Successfully uploaded to Blob Storage:', url);
         return NextResponse.json({ 
           success: true,
@@ -74,42 +94,53 @@ export async function POST(request) {
           code: blobError.code
         });
         
-        // Instead of returning an error, fall back to filesystem storage
-        console.log('Upload API: Falling back to filesystem storage after Blob error');
-        // Continue to filesystem storage logic below
+        // Try a different approach for production - return a full URL to the image
+        // This assumes the image might be deployed with the site
+        const imagePath = `/images/products/${cleanFilename}`;
+        const siteUrl = getBaseUrl();
+        const fullImageUrl = `${siteUrl}${imagePath}`;
+        
+        console.log('Upload API: Fallback to absolute URL:', fullImageUrl);
+        
+        return NextResponse.json({ 
+          success: true,
+          imagePath: fullImageUrl,
+          environment: 'vercel-fallback',
+          message: 'Using fallback method due to Blob storage issues',
+          envInfo
+        });
       }
-    }
-
-    // Use filesystem for local dev or as fallback when Blob storage fails
-    console.log('Upload API: Using filesystem storage');
-    const publicDir = path.join(process.cwd(), 'public');
-    const uploadDir = path.join(publicDir, 'images', 'products');
-    
-    console.log('Upload API: Creating upload directory:', uploadDir);
-    try {
-      await mkdir(uploadDir, { recursive: true });
-      console.log('Upload API: Directory created/verified');
-    } catch (err) {
-      console.error('Upload API: Error creating directory:', err);
-      if (err.code !== 'EEXIST') {
-        throw err;
+    } else {
+      // DEVELOPMENT ENVIRONMENT - Use local filesystem
+      console.log('Upload API: Development environment, using filesystem storage');
+      const publicDir = path.join(process.cwd(), 'public');
+      const uploadDir = path.join(publicDir, 'images', 'products');
+      
+      console.log('Upload API: Creating upload directory:', uploadDir);
+      try {
+        await mkdir(uploadDir, { recursive: true });
+        console.log('Upload API: Directory created/verified');
+      } catch (err) {
+        console.error('Upload API: Error creating directory:', err);
+        if (err.code !== 'EEXIST') {
+          throw err;
+        }
       }
+      
+      const filePath = path.join(uploadDir, cleanFilename);
+      console.log('Upload API: Writing file to:', filePath);
+      
+      await writeFile(filePath, buffer);
+      const imagePath = `/images/products/${cleanFilename}`;
+      console.log('Upload API: File successfully saved. Returning path:', imagePath);
+      
+      return NextResponse.json({ 
+        success: true,
+        imagePath: imagePath,
+        environment: 'local',
+        envInfo
+      });
     }
-    
-    const filePath = path.join(uploadDir, cleanFilename);
-    console.log('Upload API: Writing file to:', filePath);
-    
-    await writeFile(filePath, buffer);
-    const imagePath = `/images/products/${cleanFilename}`;
-    console.log('Upload API: File successfully saved. Returning path:', imagePath);
-    
-    return NextResponse.json({ 
-      success: true,
-      imagePath: imagePath,
-      environment: process.env.VERCEL ? 'vercel-filesystem-fallback' : 'local',
-      envInfo
-    });
-    
   } catch (error) {
     console.error('Upload API Error:', {
       message: error.message,

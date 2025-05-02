@@ -13,6 +13,7 @@ const productImageMap = {
   'Oops - Game Over': '/images/products/1742428398750-oops_gameover_tactaslime_img_3234.png',
   'Citrus Storm': '/images/products/1742427971497-icecreamparty_tactaslime_img_3220.png',
   'Boba Fun Slime': '/images/products/1742428232814-oops_gameover_tactaslime_img_3234.png',
+  'Boba Fun': '/images/products/1745787091577-bobafun_img_3900.png',
   'Skincare Sundays Slime': '/images/products/1742427916349-icecreamparty_tactaslime_img_3220.png',
   'Clear Slime - Ocean Breeze': '/images/products/1742428173172-oops_gameover_tactaslime_img_3234.png'
 };

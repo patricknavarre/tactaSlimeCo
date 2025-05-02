@@ -2,14 +2,12 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,22 +15,29 @@ export default function AdminLogin() {
     setError('');
 
     try {
+      console.log('Attempting login with:', { email }); // Don't log password
+      
       const result = await signIn('credentials', {
-        redirect: false,
         email,
-        password
+        password,
+        redirect: false // Changed to false to handle the response manually
       });
-
-      if (result.error) {
-        setError('Invalid email or password');
+      
+      console.log('SignIn result:', result);
+      
+      if (result?.error) {
+        // Handle authentication error
+        setError(result.error || 'Invalid email or password');
         setLoading(false);
-        return;
+      } else if (result?.ok) {
+        // Successful authentication - redirect manually
+        window.location.href = '/admin/dashboard';
+      } else {
+        setError('An unexpected error occurred');
+        setLoading(false);
       }
-
-      // Redirect to admin dashboard on successful login
-      router.push('/admin/dashboard');
-      router.refresh();
     } catch (error) {
+      console.error('Login error:', error);
       setError('An error occurred. Please try again.');
       setLoading(false);
     }

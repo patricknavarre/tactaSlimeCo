@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 
 export default function MenuPage() {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [content, setContent] = useState({
     menu: {
       title: 'Tacta Slime Menu',
@@ -39,18 +38,7 @@ export default function MenuPage() {
         }
         const data = await response.json();
         
-        // Group products by category
-        const productsByCategory = data.products.reduce((acc, product) => {
-          if (!acc[product.category]) {
-            acc[product.category] = [];
-          }
-          acc[product.category].push(product);
-          return acc;
-        }, {});
-
-        // Sort categories and set state
-        const sortedCategories = Object.keys(productsByCategory).sort();
-        setCategories(sortedCategories);
+        // Set all products without category grouping
         setProducts(data.products);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -110,61 +98,42 @@ export default function MenuPage() {
           initial="hidden"
           animate="show"
         >
-          {categories.map((category) => (
-            <motion.div 
-              key={category}
-              variants={itemVariants}
-              className="mb-16"
-            >
-              <div className="flex items-center mb-8">
-                <motion.h2 
-                  className="text-3xl font-bold text-tacta-pink font-display relative inline-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  {category}
-                  <div className="absolute -bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-tacta-pink to-tacta-peach rounded-full transform -skew-x-12"></div>
-                </motion.h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {products
-                  .filter(product => product.category === category)
-                  .map(product => (
-                    <motion.div 
-                      key={product._id}
-                      variants={itemVariants}
-                      whileHover={{ 
-                        scale: 1.03,
-                        transition: { duration: 0.2 }
-                      }}
-                      className="bg-gradient-to-br from-white to-tacta-pink-light rounded-2xl shadow-lg overflow-hidden border-2 border-tacta-pink border-opacity-20 group"
-                    >
-                      <div className="relative h-56 overflow-hidden">
-                        {product.imagePath && (
-                          <Image
-                            src={product.imagePath}
-                            alt={product.name}
-                            fill
-                            className="object-cover transform group-hover:scale-110 transition-transform duration-300"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      </div>
-                      <div className="p-6 relative">
-                        <motion.h3 
-                          className="text-2xl font-bold mb-3 text-tacta-pink font-display"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          {product.name}
-                        </motion.h3>
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                          {product.description}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-              </div>
-            </motion.div>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map(product => (
+              <motion.div 
+                key={product._id}
+                variants={itemVariants}
+                whileHover={{ 
+                  scale: 1.03,
+                  transition: { duration: 0.2 }
+                }}
+                className="bg-gradient-to-br from-white to-tacta-pink-light rounded-2xl shadow-lg overflow-hidden border-2 border-tacta-pink border-opacity-20 group"
+              >
+                <div className="relative h-56 overflow-hidden">
+                  {product.imagePath && (
+                    <Image
+                      src={product.imagePath}
+                      alt={product.name}
+                      fill
+                      className="object-cover transform group-hover:scale-110 transition-transform duration-300"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+                <div className="p-6 relative">
+                  <motion.h3 
+                    className="text-2xl font-bold mb-3 text-tacta-pink font-display"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    {product.name}
+                  </motion.h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {product.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </section>
 
