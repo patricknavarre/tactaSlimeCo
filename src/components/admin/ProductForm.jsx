@@ -238,6 +238,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
               <option value="Crunchy Slime">Crunchy Slime</option>
               <option value="Foam Slime">Foam Slime</option>
               <option value="Video Game Slime">Video Game Slime</option>
+              <option value="Taba Squishy">Taba Squishy</option>
               <option value="Floam">Floam</option>
             </select>
             {errors.category && (

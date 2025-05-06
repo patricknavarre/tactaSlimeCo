@@ -214,6 +214,7 @@ export default function ProductsManagement() {
                       <option value="glitter-slime">Glitter Slime</option>
                       <option value="crunchy-slime">Crunchy Slime</option>
                       <option value="foam-slime">Foam Slime</option>
+                      <option value="taba-squishy">Taba Squishy</option>
                       <option value="floam">Floam</option>
                     </select>
                     
