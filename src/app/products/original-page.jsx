@@ -18,6 +18,7 @@ const categories = [
   'Crunchy Slime',
   'Foam Slime',
   'Video Game Slime',
+  'Taba Squishy',
   'Floam'
 ];
 
@@ -194,66 +195,80 @@ export function ProductsContent() {
   
   return (
     <div className="container-custom py-12">
-      {/* Page Header - Brightened Up */}
+      {/* Modern Page Header */}
       <motion.div 
-        className="text-center mb-10 bg-gradient-to-r from-tacta-pink-light to-tacta-peach-light py-10 rounded-xl shadow-sm"
+        className="text-center mb-8 bg-gradient-to-br from-white to-tacta-cream py-12 rounded-xl shadow-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Slime Products</h1>
-        <p className="text-lg text-gray-700 max-w-3xl mx-auto px-4">
-          Discover our collection of handcrafted slimes, made with premium ingredients for the ultimate sensory experience.
-        </p>
-        
-        {/* Search Box - Simple & Cute */}
-        <div className="mt-6 max-w-md mx-auto">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for slimes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-full border-2 border-tacta-pink focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-tacta-pink"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg className="h-5 w-5 text-tacta-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto px-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Slime Products</h1>
+          <p className="text-lg text-gray-700 mx-auto">
+            Discover our collection of handcrafted slimes, made with premium ingredients for the ultimate sensory experience.
+          </p>
         </div>
-        
-        {/* Simple Category Filter */}
-        <div className="mt-6 flex justify-center">
-          <div className="inline-flex flex-wrap justify-center gap-2 max-w-2xl">
+      </motion.div>
+      
+      {/* Improved Search Box */}
+      <div className="mt-6 max-w-md mx-auto px-4">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search for slimes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 pl-10 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-tacta-pink focus:border-transparent shadow-sm"
+          />
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-tacta-pink"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Improved Category Filter */}
+      <div className="mt-8 px-4">
+        <div className="bg-white shadow-md rounded-xl p-4 max-w-3xl mx-auto">
+          <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-3 text-center font-medium">Filter by Category</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {categories.map((category, index) => (
               <motion.button
                 key={index} 
                 onClick={() => handleCategoryClick(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium 
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all 
                   ${category === activeCategory 
-                    ? 'bg-tacta-pink text-white border-b-4 border-r-4 border-[#D03176] transform rotate-[0.5deg]' 
-                    : 'bg-white text-gray-700 hover:bg-tacta-pink hover:text-white border-2 border-b-4 border-r-4 border-gray-200 hover:border-[#D03176]'} 
-                  transition-all shadow-sm`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                    ? 'bg-tacta-pink text-white shadow-md' 
+                    : 'bg-gray-50 text-gray-700 hover:bg-tacta-pink/10 hover:text-tacta-pink'}`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
                 {category}
               </motion.button>
             ))}
           </div>
         </div>
-        
-        {/* Search Results Summary */}
-        {searchQuery && (
-          <p className="text-sm text-gray-600 mt-4">
-            {filteredProducts.length === 0 
-              ? 'No products found matching your search.' 
-              : `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} matching "${searchQuery}"`}
-          </p>
-        )}
-      </motion.div>
+      </div>
+      
+      {/* Search Results Summary */}
+      {searchQuery && (
+        <p className="text-sm text-gray-600 mt-4">
+          {filteredProducts.length === 0 
+            ? 'No products found matching your search.' 
+            : `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} matching "${searchQuery}"`}
+        </p>
+      )}
       
       {/* Products Grid - Brightened Up */}
       {filteredProducts.length === 0 ? (
@@ -423,21 +438,5 @@ export function ProductsContent() {
         </div>
       )}
     </div>
-  );
-}
-
-// Main component with Suspense boundary
-export default function ProductsPage() {
-  return (
-    <Layout>
-      <Suspense fallback={
-        <div className="container-custom py-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tacta-pink mb-4"></div>
-          <p className="text-lg text-gray-600">Loading products...</p>
-        </div>
-      }>
-        <ProductsContent />
-      </Suspense>
-    </Layout>
   );
 } 

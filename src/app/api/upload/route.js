@@ -1,22 +1,16 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import * as blob from '@vercel/blob';
 
-// Get base URL for the current environment
-function getBaseUrl() {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-}
+// Get backend URL from environment or default to localhost
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
 
 export async function POST(request) {
   const envInfo = {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
     IS_VERCEL: process.env.VERCEL,
-    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN,
+    BACKEND_URL: BACKEND_URL,
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_REGION: process.env.VERCEL_REGION
   };
@@ -44,8 +38,18 @@ export async function POST(request) {
       size: file.size
     });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    
+    // Check if file size is too large (e.g., over 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { 
+          error: 'File too large', 
+          details: 'Maximum file size is 10MB',
+          envInfo
+        },
+        { status: 400 }
+      );
+    }
+
     // Create a unique filename
     const timestamp = Date.now();
     const cleanFilename = `${timestamp}-${file.name
@@ -55,60 +59,45 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Check environment - Production (Vercel) vs Development
+    // Check if in production or development environment
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
     
     if (isProduction) {
-      // PRODUCTION ENVIRONMENT - Must use Blob Storage
+      // In production, forward the upload to our Render backend
+      console.log('Upload API: Production environment detected, forwarding to Render backend');
+      
       try {
-        console.log('Upload API: Production environment, attempting Vercel Blob storage upload');
+        // Create a new FormData to send to the backend
+        const backendFormData = new FormData();
+        backendFormData.append('file', file);
+        backendFormData.append('filename', cleanFilename);
         
-        if (!process.env.BLOB_READ_WRITE_TOKEN) {
-          console.error('Upload API: BLOB_READ_WRITE_TOKEN is not set in production environment');
-          return NextResponse.json(
-            { 
-              error: 'Server configuration error', 
-              details: 'Blob storage token not configured in production environment',
-              envInfo
-            },
-            { status: 500 }
-          );
+        // Send the file to the Render backend
+        const backendUrl = `${BACKEND_URL}/api/upload`;
+        console.log(`Upload API: Forwarding to backend URL: ${backendUrl}`);
+        
+        const backendResponse = await fetch(backendUrl, {
+          method: 'POST',
+          body: backendFormData,
+        });
+        
+        if (!backendResponse.ok) {
+          const errorText = await backendResponse.text();
+          throw new Error(`Backend upload failed: ${backendResponse.status} - ${errorText}`);
         }
         
-        const { url } = await blob.put(cleanFilename, file, {
-          access: 'public',
-          addRandomSuffix: false
-        });
+        const backendData = await backendResponse.json();
+        console.log('Upload API: Backend response:', backendData);
         
-        console.log('Upload API: Successfully uploaded to Blob Storage:', url);
-        return NextResponse.json({ 
+        return NextResponse.json({
           success: true,
-          imagePath: url,
-          environment: 'vercel',
-          envInfo
+          imagePath: backendData.imageUrl || backendData.url || backendData.imagePath,
+          environment: 'render',
+          backendData
         });
-      } catch (blobError) {
-        console.error('Upload API: Blob storage error:', {
-          message: blobError.message,
-          stack: blobError.stack,
-          code: blobError.code
-        });
-        
-        // Try a different approach for production - return a full URL to the image
-        // This assumes the image might be deployed with the site
-        const imagePath = `/images/products/${cleanFilename}`;
-        const siteUrl = getBaseUrl();
-        const fullImageUrl = `${siteUrl}${imagePath}`;
-        
-        console.log('Upload API: Fallback to absolute URL:', fullImageUrl);
-        
-        return NextResponse.json({ 
-          success: true,
-          imagePath: fullImageUrl,
-          environment: 'vercel-fallback',
-          message: 'Using fallback method due to Blob storage issues',
-          envInfo
-        });
+      } catch (backendError) {
+        console.error('Upload API: Backend upload error:', backendError);
+        throw new Error(`Error forwarding to backend: ${backendError.message}`);
       }
     } else {
       // DEVELOPMENT ENVIRONMENT - Use local filesystem
@@ -127,6 +116,7 @@ export async function POST(request) {
         }
       }
       
+      const buffer = Buffer.from(await file.arrayBuffer());
       const filePath = path.join(uploadDir, cleanFilename);
       console.log('Upload API: Writing file to:', filePath);
       
@@ -144,16 +134,14 @@ export async function POST(request) {
   } catch (error) {
     console.error('Upload API Error:', {
       message: error.message,
-      stack: error.stack,
-      envInfo
+      stack: error.stack
     });
     
     return NextResponse.json(
       { 
         error: 'Error uploading file', 
         details: error.message,
-        stack: error.stack,
-        envInfo
+        stack: error.stack
       },
       { status: 500 }
     );

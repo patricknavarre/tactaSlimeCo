@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ProductForm from '@/components/admin/ProductForm';
 import { createProduct } from '@/lib/api';
+import Image from 'next/image';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -68,21 +69,16 @@ export default function NewProductPage() {
         <div className="container-custom flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link href="/admin/dashboard" className="flex-shrink-0">
-              <svg 
-                className="w-36 h-12" 
-                viewBox="0 0 600 300" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Pink tacta logo - simplified for brevity */}
-                <g>
-                  <path d="M18.5,90.7c7.3,0,19.3,1.3,27.3,5.3c8,4,13.3,12,13.3,21.3c0,10-4.7,18-12.7,22c-8,4-17.3,5.3-24.7,5.3h-6.7v23.3h-14v-77.3H18.5z" fill="#FF1493"/>
-                  <path d="M126.2,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H126.2z" fill="#FF1493"/>
-                  <path d="M233.8,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H233.8z" fill="#FF1493"/>
-                  <path d="M341.5,90.7c7.3,0,19.3,1.3,27.3,5.3c8,4,13.3,12,13.3,21.3c0,10-4.7,18-12.7,22c-8,4-17.3,5.3-24.7,5.3h-6.7v23.3h-14v-77.3H341.5z" fill="#FF1493"/>
-                  <path d="M449.2,90.7c10,0,20,1.3,30,5.3c10,4,18,12,18,27.3c0,15.3-8,23.3-18,27.3c-10,4-20,5.3-30,5.3h-10v12h-14v-77.3H449.2z" fill="#FF1493"/>
-                </g>
-              </svg>
+              <div className="relative h-12 w-48">
+                <Image
+                  src="/images/TactaLogo_image002.png"
+                  alt="Tacta Slime Company Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                  quality={100}
+                />
+              </div>
             </Link>
             <span className="ml-4 text-xl font-semibold text-gray-900">Add New Product</span>
           </div>
