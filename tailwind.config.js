@@ -53,10 +53,20 @@ module.exports = {
           '0%, 100%': { opacity: 1 },
           '50%': { opacity: 0.5 },
         },
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-25%)' },
+        }
       },
       animation: {
         float: 'float 6s ease-in-out infinite',
         pulse: 'pulse 3s ease-in-out infinite',
+        fadeIn: 'fadeIn 0.3s ease-in-out',
+        bounce: 'bounce 1s ease-in-out infinite',
       },
       backdropBlur: {
         xs: '2px',
