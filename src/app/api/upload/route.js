@@ -2,19 +2,15 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
-// Get base URL for the current environment
-function getBaseUrl() {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-}
+// Get backend URL from environment or default to localhost
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
 
 export async function POST(request) {
   const envInfo = {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_ENV: process.env.VERCEL_ENV,
     IS_VERCEL: process.env.VERCEL,
+    BACKEND_URL: BACKEND_URL,
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_REGION: process.env.VERCEL_REGION
   };
@@ -54,8 +50,6 @@ export async function POST(request) {
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    
     // Create a unique filename
     const timestamp = Date.now();
     const cleanFilename = `${timestamp}-${file.name
@@ -65,26 +59,46 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Check if in production environment
+    // Check if in production or development environment
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
     
     if (isProduction) {
-      // In production, we don't write to the filesystem directly
-      // Instead, we return a path that will work after deployment
-      console.log('Upload API: Production environment detected');
+      // In production, forward the upload to our Render backend
+      console.log('Upload API: Production environment detected, forwarding to Render backend');
       
-      // Return path to the image that would be at this location when deployed
-      const imagePath = `/images/products/${cleanFilename}`;
-      console.log('Upload API: Generated image path for production:', imagePath);
-      
-      return NextResponse.json({ 
-        success: true,
-        imagePath: imagePath,
-        environment: 'vercel',
-        message: 'Production mode: Using static image path',
-        note: 'In production, upload image manually then rebuild/redeploy',
-        envInfo
-      });
+      try {
+        // Create a new FormData to send to the backend
+        const backendFormData = new FormData();
+        backendFormData.append('file', file);
+        backendFormData.append('filename', cleanFilename);
+        
+        // Send the file to the Render backend
+        const backendUrl = `${BACKEND_URL}/api/upload`;
+        console.log(`Upload API: Forwarding to backend URL: ${backendUrl}`);
+        
+        const backendResponse = await fetch(backendUrl, {
+          method: 'POST',
+          body: backendFormData,
+        });
+        
+        if (!backendResponse.ok) {
+          const errorText = await backendResponse.text();
+          throw new Error(`Backend upload failed: ${backendResponse.status} - ${errorText}`);
+        }
+        
+        const backendData = await backendResponse.json();
+        console.log('Upload API: Backend response:', backendData);
+        
+        return NextResponse.json({
+          success: true,
+          imagePath: backendData.imageUrl || backendData.url || backendData.imagePath,
+          environment: 'render',
+          backendData
+        });
+      } catch (backendError) {
+        console.error('Upload API: Backend upload error:', backendError);
+        throw new Error(`Error forwarding to backend: ${backendError.message}`);
+      }
     } else {
       // DEVELOPMENT ENVIRONMENT - Use local filesystem
       console.log('Upload API: Development environment, using filesystem storage');
@@ -102,6 +116,7 @@ export async function POST(request) {
         }
       }
       
+      const buffer = Buffer.from(await file.arrayBuffer());
       const filePath = path.join(uploadDir, cleanFilename);
       console.log('Upload API: Writing file to:', filePath);
       
@@ -119,16 +134,14 @@ export async function POST(request) {
   } catch (error) {
     console.error('Upload API Error:', {
       message: error.message,
-      stack: error.stack,
-      envInfo
+      stack: error.stack
     });
     
     return NextResponse.json(
       { 
         error: 'Error uploading file', 
         details: error.message,
-        stack: error.stack,
-        envInfo
+        stack: error.stack
       },
       { status: 500 }
     );
