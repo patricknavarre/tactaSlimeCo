@@ -1,6 +1,6 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectToDatabase } from '@/lib/mongodb';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // NextAuth configuration options
 export const authOptions = {
