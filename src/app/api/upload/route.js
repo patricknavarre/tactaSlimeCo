@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { put } from '@vercel/blob';
 
 // Get backend URL from environment or default to localhost
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5051';
@@ -13,7 +14,8 @@ export async function POST(request) {
     BACKEND_URL: BACKEND_URL,
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_REGION: process.env.VERCEL_REGION,
-    FORWARD_UPLOADS: process.env.FORWARD_UPLOADS
+    FORWARD_UPLOADS: process.env.FORWARD_UPLOADS,
+    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN
   };
 
   try {
@@ -39,12 +41,12 @@ export async function POST(request) {
       size: file.size
     });
 
-    // Check if file size is too large (e.g., over 10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Check if file size is too large (e.g., over 4MB for Vercel)
+    if (file.size > 4 * 1024 * 1024) {
       return NextResponse.json(
         { 
           error: 'File too large', 
-          details: 'Maximum file size is 10MB',
+          details: 'Maximum file size is 4MB',
           envInfo
         },
         { status: 400 }
@@ -60,12 +62,38 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Check if we should forward uploads to the backend
-    // Either in production or when FORWARD_UPLOADS is set to 'true'
+    // Check if we're in production (Vercel)
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
-    const shouldForward = isProduction || process.env.FORWARD_UPLOADS === 'true';
     
-    // Check if this request already came from a forwarding attempt to prevent loops
+    // If we're in production and have blob storage token, use Vercel Blob
+    if (isProduction && process.env.BLOB_READ_WRITE_TOKEN) {
+      console.log('Upload API: Using Vercel Blob Storage');
+      try {
+        // Convert file to buffer
+        const buffer = Buffer.from(await file.arrayBuffer());
+        
+        // Upload to Vercel Blob Storage
+        const { url } = await put(cleanFilename, buffer, {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: file.type
+        });
+        
+        console.log('Upload API: File uploaded to Blob Storage:', url);
+        
+        return NextResponse.json({
+          success: true,
+          imagePath: url,
+          environment: 'vercel-blob'
+        });
+      } catch (blobError) {
+        console.error('Upload API: Blob storage error:', blobError);
+        throw blobError; // Re-throw to be caught by the outer catch
+      }
+    }
+    
+    // For the Render backend - if forwarding is enabled
+    const shouldForward = process.env.FORWARD_UPLOADS === 'true';
     const isForwarded = request.headers.get('x-is-forwarded') === 'true';
     
     if (shouldForward && !isForwarded) {
@@ -142,43 +170,51 @@ export async function POST(request) {
       } catch (backendError) {
         console.error('Upload API: Backend upload error:', backendError);
         
-        // If backend upload fails, fall back to local storage
-        console.log('Upload API: Backend upload failed. Falling back to local storage.');
+        // If we're in production, we shouldn't try to use local storage as fallback
+        if (isProduction) {
+          throw backendError; // Re-throw to be caught by the outer catch
+        }
         
-        // Continue to local file storage below instead of throwing
+        // Otherwise, for development, continue to local file storage
+        console.log('Upload API: Backend upload failed. Falling back to local storage.');
       }
     }
     
-    // DEVELOPMENT ENVIRONMENT or fallback if backend upload failed
-    console.log('Upload API: Using filesystem storage');
-    const publicDir = path.join(process.cwd(), 'public');
-    const uploadDir = path.join(publicDir, 'images', 'products');
-    
-    console.log('Upload API: Creating upload directory:', uploadDir);
-    try {
-      await mkdir(uploadDir, { recursive: true });
-      console.log('Upload API: Directory created/verified');
-    } catch (err) {
-      console.error('Upload API: Error creating directory:', err);
-      if (err.code !== 'EEXIST') {
-        throw err;
+    // DEVELOPMENT ENVIRONMENT ONLY - Local filesystem storage
+    if (!isProduction) {
+      console.log('Upload API: Using local filesystem storage');
+      const publicDir = path.join(process.cwd(), 'public');
+      const uploadDir = path.join(publicDir, 'images', 'products');
+      
+      console.log('Upload API: Creating upload directory:', uploadDir);
+      try {
+        await mkdir(uploadDir, { recursive: true });
+        console.log('Upload API: Directory created/verified');
+      } catch (err) {
+        console.error('Upload API: Error creating directory:', err);
+        if (err.code !== 'EEXIST') {
+          throw err;
+        }
       }
+      
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const filePath = path.join(uploadDir, cleanFilename);
+      console.log('Upload API: Writing file to:', filePath);
+      
+      await writeFile(filePath, buffer);
+      const imagePath = `/images/products/${cleanFilename}`;
+      console.log('Upload API: File successfully saved. Returning path:', imagePath);
+      
+      return NextResponse.json({ 
+        success: true,
+        imagePath: imagePath,
+        environment: 'local',
+        envInfo
+      });
+    } else {
+      // If we reached here in production, something went wrong
+      throw new Error('No suitable storage method available in production');
     }
-    
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = path.join(uploadDir, cleanFilename);
-    console.log('Upload API: Writing file to:', filePath);
-    
-    await writeFile(filePath, buffer);
-    const imagePath = `/images/products/${cleanFilename}`;
-    console.log('Upload API: File successfully saved. Returning path:', imagePath);
-    
-    return NextResponse.json({ 
-      success: true,
-      imagePath: imagePath,
-      environment: 'local',
-      envInfo
-    });
   } catch (error) {
     console.error('Upload API Error:', {
       message: error.message,
