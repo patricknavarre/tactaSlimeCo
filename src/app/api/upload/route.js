@@ -15,7 +15,8 @@ export async function POST(request) {
     VERCEL_URL: process.env.VERCEL_URL,
     VERCEL_REGION: process.env.VERCEL_REGION,
     FORWARD_UPLOADS: process.env.FORWARD_UPLOADS,
-    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN
+    BLOB_TOKEN_EXISTS: !!process.env.BLOB_READ_WRITE_TOKEN,
+    BLOB_TOKEN_LENGTH: process.env.BLOB_READ_WRITE_TOKEN ? process.env.BLOB_READ_WRITE_TOKEN.length : 0
   };
 
   try {
@@ -67,16 +68,22 @@ export async function POST(request) {
     
     // If we're in production and have blob storage token, use Vercel Blob
     if (isProduction && process.env.BLOB_READ_WRITE_TOKEN) {
-      console.log('Upload API: Using Vercel Blob Storage');
+      console.log('Upload API: Using Vercel Blob Storage. Token length:', process.env.BLOB_READ_WRITE_TOKEN.length);
+      
       try {
         // Convert file to buffer
         const buffer = Buffer.from(await file.arrayBuffer());
         
-        // Upload to Vercel Blob Storage
+        // Sanitize content type to avoid issues with blob storage
+        const contentType = file.type || 'application/octet-stream';
+        
+        // Upload to Vercel Blob Storage with explicit options
         const { url } = await put(cleanFilename, buffer, {
           access: 'public',
           addRandomSuffix: false,
-          contentType: file.type
+          contentType: contentType,
+          cacheControlMaxAge: 31536000, // 1 year (in seconds)
+          allowOverwrite: true, // Allow overwriting existing files with the same name
         });
         
         console.log('Upload API: File uploaded to Blob Storage:', url);
@@ -87,8 +94,20 @@ export async function POST(request) {
           environment: 'vercel-blob'
         });
       } catch (blobError) {
-        console.error('Upload API: Blob storage error:', blobError);
-        throw blobError; // Re-throw to be caught by the outer catch
+        console.error('Upload API: Blob storage error details:', {
+          message: blobError.message,
+          name: blobError.name,
+          stack: blobError.stack,
+          code: blobError.code,
+          blobInfo: {
+            token_exists: !!process.env.BLOB_READ_WRITE_TOKEN,
+            token_length: process.env.BLOB_READ_WRITE_TOKEN ? process.env.BLOB_READ_WRITE_TOKEN.length : 0,
+            token_start: process.env.BLOB_READ_WRITE_TOKEN ? process.env.BLOB_READ_WRITE_TOKEN.substring(0, 5) + '...' : null,
+          }
+        });
+        
+        // Re-throw to be caught by the outer catch
+        throw new Error(`Blob storage error: ${blobError.message}`);
       }
     }
     
@@ -225,7 +244,8 @@ export async function POST(request) {
       { 
         error: 'Error uploading file', 
         details: error.message,
-        stack: error.stack
+        stack: error.stack,
+        envInfo
       },
       { status: 500 }
     );
