@@ -65,7 +65,10 @@ export async function POST(request) {
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
     const shouldForward = isProduction || process.env.FORWARD_UPLOADS === 'true';
     
-    if (shouldForward) {
+    // Check if this request already came from a forwarding attempt to prevent loops
+    const isForwarded = request.headers.get('x-is-forwarded') === 'true';
+    
+    if (shouldForward && !isForwarded) {
       // Forward the upload to our Render backend
       console.log(`Upload API: ${isProduction ? 'Production environment' : 'FORWARD_UPLOADS enabled'}, forwarding to Render backend`);
       
@@ -97,6 +100,9 @@ export async function POST(request) {
         const backendResponse = await fetch(backendUrl, {
           method: 'POST',
           body: backendFormData,
+          headers: {
+            'x-is-forwarded': 'true' // Mark this request as forwarded to prevent loops
+          },
           signal: controller.signal
         });
         
