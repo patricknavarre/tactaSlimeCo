@@ -6,6 +6,12 @@
       "dest": "/$1"
     }
   ],
+  "functions": {
+    "api/upload": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
   "env": {
     "NODE_ENV": "production"
   },

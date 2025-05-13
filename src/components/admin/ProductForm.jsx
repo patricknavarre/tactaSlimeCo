@@ -59,6 +59,13 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check file size - Vercel has a 4.5MB limit for API routes
+    const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError(`Image is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Please choose an image under 4MB.`);
+      return;
+    }
+
     // Show preview immediately
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -82,12 +89,17 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
         body: formData,
       });
 
+      // Check if the response is ok before trying to parse JSON
+      if (!response.ok) {
+        if (response.status === 413) {
+          throw new Error('File too large for the server. Please use an image smaller than 4MB.');
+        }
+        const errorText = await response.text();
+        throw new Error(errorText || `Server error: ${response.status}`);
+      }
+
       const data = await response.json();
       console.log('Upload response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload image');
-      }
 
       if (!data.success || !data.imagePath) {
         throw new Error('Invalid response from server');
@@ -424,7 +436,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                   {uploadError && (
                     <p className="text-sm text-red-600">{uploadError}</p>
                   )}
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to <strong>4MB</strong> (Vercel API size limit)</p>
                 </div>
               </div>
             </div>
