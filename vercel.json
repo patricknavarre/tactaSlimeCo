@@ -7,7 +7,7 @@
     }
   ],
   "functions": {
-    "/api/upload": {
+    "api/upload.js": {
       "memory": 1024,
       "maxDuration": 60
     }
