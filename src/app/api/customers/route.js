@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { createCustomerDocument } from '@/models/schemas';
+import bcrypt from 'bcryptjs';
 
 // GET handler to fetch all customers
 export async function GET(request) {
@@ -61,44 +62,31 @@ export async function GET(request) {
 }
 
 // POST handler to create a new customer
-export async function POST(request) {
+export async function POST(req) {
   try {
+    const { email, password } = await req.json();
+    if (!email || !password) {
+      return NextResponse.json({ success: false, error: 'Email and password are required.' }, { status: 400 });
+    }
+
     const client = await clientPromise;
     const db = client.db("tactaSlime");
-    
-    // Parse the JSON body from the request
-    const customerData = await request.json();
-    
-    // Check if email already exists
-    if (customerData.email) {
-      const existingCustomer = await db.collection("customers").findOne({ 
-        email: customerData.email 
-      });
-      
-      if (existingCustomer) {
-        return NextResponse.json(
-          { success: false, message: 'A customer with this email already exists' },
-          { status: 400 }
-        );
-      }
+    const existing = await db.collection('customers').findOne({ email });
+    if (existing) {
+      return NextResponse.json({ success: false, error: 'Email already registered.' }, { status: 400 });
     }
-    
-    // Format the data using our schema helper
-    const newCustomer = createCustomerDocument(customerData);
-    
-    // Insert the new customer
-    const result = await db.collection("customers").insertOne(newCustomer);
-    
-    return NextResponse.json({ 
-      success: true, 
-      insertedId: result.insertedId,
-      customer: newCustomer
-    }, { status: 201 });
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newCustomer = {
+      email,
+      passwordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: 'Active',
+    };
+    await db.collection('customers').insertOne(newCustomer);
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Database error:", error);
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 } 

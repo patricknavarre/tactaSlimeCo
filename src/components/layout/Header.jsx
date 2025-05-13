@@ -38,17 +38,17 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-[#FF1493] to-[#FF7F50] shadow-md relative">
+    <header className="bg-gradient-to-r from-[#A387D6] to-[#FF7F50] shadow-md relative">
       <div className="container-custom py-4">
         <nav className="flex items-center justify-between">
           <div className="flex-shrink-0">
             <Link href="/" aria-label="Tacta Slime Company Home">
-              <div className="relative h-24 w-24 md:h-32 md:w-32 bg-white rounded-full p-2 shadow-lg transform hover:scale-105 transition-transform duration-300 border-4 border-white overflow-hidden hover:shadow-2xl">
+              <div className="relative h-24 w-24 md:h-32 md:w-32 transform hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/images/TactaLogo_image002.png"
+                  src="/images/Tacta_WhiteLogo.png"
                   alt="Tacta Slime Company Logo"
                   fill
-                  className="object-contain p-1"
+                  className="object-contain"
                   priority
                   quality={100}
                 />
@@ -126,7 +126,12 @@ const Header = () => {
           
           <div className="flex space-x-4 items-center">
             <CartIcon />
-            
+            <Link 
+              href="/account"
+              className="inline-block px-6 py-2 rounded-full font-bold text-tacta-pink bg-white border-2 border-black border-b-4 border-r-4 shadow-[0_4px_0_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_0_rgba(0,0,0,0.15),0_3px_8px_rgba(0,0,0,0.1)] active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)] active:border-b-2 active:border-r-2 transition-all duration-200 ease-in-out transform hover:-translate-y-1 active:translate-y-1"
+            >
+              Account
+            </Link>
             <button 
               className="md:hidden bg-white rounded-full p-2 shadow-[0_4px_0_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.1)] text-tacta-pink transform transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-[0_6px_0_rgba(0,0,0,0.1),0_3px_8px_rgba(0,0,0,0.1)] active:translate-y-1 active:shadow-[0_2px_0_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.1)]"
               onClick={toggleMenu}

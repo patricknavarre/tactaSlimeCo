@@ -12,7 +12,8 @@ export async function POST(request) {
     IS_VERCEL: process.env.VERCEL,
     BACKEND_URL: BACKEND_URL,
     VERCEL_URL: process.env.VERCEL_URL,
-    VERCEL_REGION: process.env.VERCEL_REGION
+    VERCEL_REGION: process.env.VERCEL_REGION,
+    FORWARD_UPLOADS: process.env.FORWARD_UPLOADS
   };
 
   try {
@@ -59,12 +60,14 @@ export async function POST(request) {
 
     console.log('Upload API: Cleaned filename:', cleanFilename);
 
-    // Check if in production or development environment
+    // Check if we should forward uploads to the backend
+    // Either in production or when FORWARD_UPLOADS is set to 'true'
     const isProduction = process.env.VERCEL || process.env.VERCEL_ENV;
+    const shouldForward = isProduction || process.env.FORWARD_UPLOADS === 'true';
     
-    if (isProduction) {
-      // In production, forward the upload to our Render backend
-      console.log('Upload API: Production environment detected, forwarding to Render backend');
+    if (shouldForward) {
+      // Forward the upload to our Render backend
+      console.log(`Upload API: ${isProduction ? 'Production environment' : 'FORWARD_UPLOADS enabled'}, forwarding to Render backend`);
       
       try {
         // Create a new FormData to send to the backend
@@ -72,65 +75,104 @@ export async function POST(request) {
         backendFormData.append('file', file);
         backendFormData.append('filename', cleanFilename);
         
-        // Send the file to the Render backend
-        const backendUrl = `${BACKEND_URL}/api/upload`;
+        // Ensure backend URL is properly formatted with http:// prefix
+        let backendUrl = BACKEND_URL;
+        if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
+          backendUrl = `http://${backendUrl}`; 
+        }
+        
+        if (!backendUrl.endsWith('/')) {
+          backendUrl += '/';
+        }
+        
+        // Complete URL with api/upload path
+        backendUrl += 'api/upload';
+        
         console.log(`Upload API: Forwarding to backend URL: ${backendUrl}`);
+        
+        // Set a timeout for the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         
         const backendResponse = await fetch(backendUrl, {
           method: 'POST',
           body: backendFormData,
+          signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
+        
         if (!backendResponse.ok) {
-          const errorText = await backendResponse.text();
+          let errorText;
+          try {
+            errorText = await backendResponse.text();
+          } catch (e) {
+            errorText = `Could not read error response: ${e.message}`;
+          }
+          
           throw new Error(`Backend upload failed: ${backendResponse.status} - ${errorText}`);
         }
         
-        const backendData = await backendResponse.json();
+        // Try to parse the response as JSON
+        let backendData;
+        const contentType = backendResponse.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          backendData = await backendResponse.json();
+        } else {
+          const text = await backendResponse.text();
+          console.log('Upload API: Backend returned non-JSON response:', text);
+          backendData = { success: true, notes: "Non-JSON response", text: text.substring(0, 100) };
+        }
+        
         console.log('Upload API: Backend response:', backendData);
         
         return NextResponse.json({
           success: true,
-          imagePath: backendData.imageUrl || backendData.url || backendData.imagePath,
+          imagePath: backendData.imageUrl || backendData.url || backendData.imagePath || `/images/products/${cleanFilename}`,
           environment: 'render',
           backendData
         });
       } catch (backendError) {
         console.error('Upload API: Backend upload error:', backendError);
-        throw new Error(`Error forwarding to backend: ${backendError.message}`);
+        
+        // If backend upload fails, fall back to local storage
+        console.log('Upload API: Backend upload failed. Falling back to local storage.');
+        
+        // Continue to local file storage below instead of throwing
       }
-    } else {
-      // DEVELOPMENT ENVIRONMENT - Use local filesystem
-      console.log('Upload API: Development environment, using filesystem storage');
-      const publicDir = path.join(process.cwd(), 'public');
-      const uploadDir = path.join(publicDir, 'images', 'products');
-      
-      console.log('Upload API: Creating upload directory:', uploadDir);
-      try {
-        await mkdir(uploadDir, { recursive: true });
-        console.log('Upload API: Directory created/verified');
-      } catch (err) {
-        console.error('Upload API: Error creating directory:', err);
-        if (err.code !== 'EEXIST') {
-          throw err;
-        }
-      }
-      
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const filePath = path.join(uploadDir, cleanFilename);
-      console.log('Upload API: Writing file to:', filePath);
-      
-      await writeFile(filePath, buffer);
-      const imagePath = `/images/products/${cleanFilename}`;
-      console.log('Upload API: File successfully saved. Returning path:', imagePath);
-      
-      return NextResponse.json({ 
-        success: true,
-        imagePath: imagePath,
-        environment: 'local',
-        envInfo
-      });
     }
+    
+    // DEVELOPMENT ENVIRONMENT or fallback if backend upload failed
+    console.log('Upload API: Using filesystem storage');
+    const publicDir = path.join(process.cwd(), 'public');
+    const uploadDir = path.join(publicDir, 'images', 'products');
+    
+    console.log('Upload API: Creating upload directory:', uploadDir);
+    try {
+      await mkdir(uploadDir, { recursive: true });
+      console.log('Upload API: Directory created/verified');
+    } catch (err) {
+      console.error('Upload API: Error creating directory:', err);
+      if (err.code !== 'EEXIST') {
+        throw err;
+      }
+    }
+    
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filePath = path.join(uploadDir, cleanFilename);
+    console.log('Upload API: Writing file to:', filePath);
+    
+    await writeFile(filePath, buffer);
+    const imagePath = `/images/products/${cleanFilename}`;
+    console.log('Upload API: File successfully saved. Returning path:', imagePath);
+    
+    return NextResponse.json({ 
+      success: true,
+      imagePath: imagePath,
+      environment: 'local',
+      envInfo
+    });
   } catch (error) {
     console.error('Upload API Error:', {
       message: error.message,
